@@ -48,6 +48,11 @@ app.include_router(teams.router, prefix="/api")
 app.include_router(matches.router, prefix="/api")
 
 
+@app.get("/")
+def root():
+    return {"message": "CricPulse API is running!"}
+
+
 @app.get("/health")
 def health():
     return {"status": "healthy", "service": "CricPulse API", "version": "2.1.0"}
