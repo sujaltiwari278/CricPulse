@@ -80,6 +80,37 @@ class PlayerStatsService:
 
         highest = max(innings_scores.values(), default=0)
         not_outs = sum(1 for iid in innings_scores if iid not in dismissed_in_innings)
+        fifties = sum(1 for score in innings_scores.values() if 50 <= score < 100)
+        hundreds = sum(1 for score in innings_scores.values() if score >= 100)
+
+        credited_wicket_types = {"BOWLED", "CAUGHT", "LBW", "STUMPED", "HIT_WICKET"}
+        bowling_figures = []
+        bowled_innings_rows = db.scalars(
+            select(Innings)
+            .join(Delivery, Delivery.innings_id == Innings.id)
+            .where(Delivery.bowler_id == player_id)
+            .distinct()
+        ).all()
+        for inn in bowled_innings_rows:
+            balls_in_innings = 0
+            conceded_in_innings = 0
+            wickets_in_innings = 0
+            for d in inn.deliveries:
+                if d.bowler_id != player_id:
+                    continue
+                if d.legal:
+                    balls_in_innings += 1
+                if d.extra_type not in ("BYE", "LEG_BYE"):
+                    conceded_in_innings += d.total_runs
+                if d.dismissed_player_id and d.wicket_type in credited_wicket_types:
+                    wickets_in_innings += 1
+            if balls_in_innings or wickets_in_innings:
+                bowling_figures.append((wickets_in_innings, conceded_in_innings))
+
+        best_bowling = max(bowling_figures, key=lambda pair: (pair[0], -pair[1]), default=(0, 0))
+        best_bowling_figures = f"{best_bowling[0]}/{best_bowling[1]}" if bowling_figures else "—"
+        three_wicket_hauls = sum(1 for wickets_in, _ in bowling_figures if 3 <= wickets_in < 5)
+        five_wicket_hauls = sum(1 for wickets_in, _ in bowling_figures if wickets_in >= 5)
 
         overs = f"{legal_bowling_balls // 6}.{legal_bowling_balls % 6}"
         average = (runs / (len(innings_scores) - not_outs)) if (len(innings_scores) - not_outs) > 0 else 0.0
@@ -106,6 +137,11 @@ class PlayerStatsService:
             "overs_bowled": overs,
             "runs_conceded": runs_conceded,
             "economy": round(economy, 2),
+            "fifties": fifties,
+            "hundreds": hundreds,
+            "best_bowling_figures": best_bowling_figures,
+            "three_wicket_hauls": three_wicket_hauls,
+            "five_wicket_hauls": five_wicket_hauls,
             "catches": catches,
             "run_outs": run_outs,
         }
