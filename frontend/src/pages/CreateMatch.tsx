@@ -1,0 +1,42 @@
+import { ArrowLeft, MapPin, Search, Swords } from "lucide-react";
+import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { matchesApi, teamsApi, type MatchFormat, type Team } from "../api/cricpulse";
+
+export default function CreateMatch() {
+ const navigate=useNavigate(); const [teams,setTeams]=useState<Team[]>([]); const [teamA,setTeamA]=useState(""); const [teamB,setTeamB]=useState(""); const [format,setFormat]=useState<MatchFormat>("T20"); const [overs,setOvers]=useState("20"); const [days,setDays]=useState("5"); const [perDay,setPerDay]=useState("90"); const [venue,setVenue]=useState(""); const [location,setLocation]=useState(""); const [latitude,setLatitude]=useState(""); const [longitude,setLongitude]=useState(""); const [description,setDescription]=useState(""); const [error,setError]=useState(""); const [saving,setSaving]=useState(false);
+ const [country,setCountry]=useState("");
+ const [mapQuery,setMapQuery]=useState("");
+ const [mapResults,setMapResults]=useState<{display_name:string;lat:string;lon:string}[]>([]);
+ const [mapSearching,setMapSearching]=useState(false);
+ const countries=countryOptions();
+ useEffect(()=>{teamsApi.list().then(setTeams).catch(e=>setError(e instanceof Error?e.message:"Unable to load teams."));},[]);
+ async function searchLocation(){
+   if(!mapQuery.trim()) return;
+   try{setMapSearching(true);setError("");
+     const r=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(mapQuery)}&limit=6`);
+     const j=await r.json();
+     setMapResults((j.features??[]).map((f:any)=>({display_name:f.properties?.name ? [f.properties.name,f.properties.city,f.properties.country].filter(Boolean).join(", ") : (f.properties?.country??mapQuery),lat:String(f.geometry.coordinates[1]),lon:String(f.geometry.coordinates[0])})));
+   }catch{setError("Unable to search this location. Try the city or stadium name.");}finally{setMapSearching(false);}
+ }
+ function chooseLocation(r:{display_name:string;lat:string;lon:string}){
+   setLocation(r.display_name); setLatitude(r.lat); setLongitude(r.lon);
+   const parts=r.display_name.split(",").map(x=>x.trim()); const last=parts.at(-1);
+   if(last && countries.includes(last)) setCountry(last);
+   setMapResults([]);
+ }
+ async function submit(e:FormEvent){e.preventDefault();setError("");if(!teamA||!teamB)return setError("Select both teams.");if(teamA===teamB)return setError("A match must have two different teams.");try{setSaving(true);const data=format==="TEST"?{team_a_id:+teamA,team_b_id:+teamB,format,test_days:+days,overs_per_day:+perDay,venue:venue||undefined,location:location||country||undefined,latitude:latitude?+latitude:undefined,longitude:longitude?+longitude:undefined,description:description||undefined}:{team_a_id:+teamA,team_b_id:+teamB,format,overs:+overs,venue:venue||undefined,location:location||country||undefined,latitude:latitude?+latitude:undefined,longitude:longitude?+longitude:undefined,description:description||undefined};const m=await matchesApi.create(data);navigate(`/matches/${m.id}`);}catch(e){setError(e instanceof Error?e.message:"Unable to create match.")}finally{setSaving(false)}}
+ return <main className="min-h-screen bg-slate-50 px-4 py-8 md:px-6"><div className="mx-auto max-w-4xl"><Link to="/teams" className="mb-5 inline-flex items-center gap-2 font-bold text-slate-500"><ArrowLeft size={16}/>Back</Link><div className="mb-6 rounded-3xl bg-slate-950 p-7 text-white md:p-10"><div className="flex items-center gap-4"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 text-slate-950"><Swords/></div><div><p className="text-xs font-black uppercase tracking-[.25em] text-emerald-400">Match Centre</p><h1 className="text-3xl font-black md:text-4xl">Create a real match.</h1></div></div><p className="mt-4 text-slate-300">Use real registered teams. The toss is generated on the server and match settings lock after start.</p></div>{error&&<div className="mb-5 rounded-2xl bg-red-50 p-4 font-semibold text-red-700">{error}</div>}<form onSubmit={submit} className="grid gap-6"><section className="grid gap-5 rounded-3xl bg-white p-6 shadow-sm md:grid-cols-2 md:p-8"><Field label="Team A"><select required value={teamA} onChange={e=>setTeamA(e.target.value)} className="input"><option value="">Select team</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name} ({t.short_name})</option>)}</select></Field><Field label="Team B"><select required value={teamB} onChange={e=>setTeamB(e.target.value)} className="input"><option value="">Select team</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name} ({t.short_name})</option>)}</select></Field><Field label="Format"><select value={format} onChange={e=>{const f=e.target.value as MatchFormat;setFormat(f);if(f==="T20")setOvers("20");if(f==="ODI")setOvers("50");if(f==="CUSTOM")setOvers("10")}} className="input"><option value="T20">T20 — 20 overs</option><option value="ODI">ODI — 50 overs</option><option value="CUSTOM">Custom overs</option><option value="TEST">Test match</option></select></Field>{format!=="TEST"?<Field label="Overs"><input className="input" type="number" min={4} max={1000} required value={overs} onChange={e=>setOvers(e.target.value)}/></Field>:<><Field label="Test days"><select className="input" value={days} onChange={e=>setDays(e.target.value)}>{[1,2,3,4,5].map(n=><option key={n}>{n}</option>)}</select></Field><Field label="Overs per day"><input className="input" type="number" min={1} max={300} required value={perDay} onChange={e=>setPerDay(e.target.value)}/></Field></>}<Field label="Venue"><input className="input" value={venue} onChange={e=>setVenue(e.target.value)} placeholder="Stadium / ground"/></Field><Field label="Country"><select className="input" value={country} onChange={e=>setCountry(e.target.value)}><option value="">Select country</option>{countries.map(c=><option key={c}>{c}</option>)}</select></Field>
+<Field label="Match location" wide>
+  <div className="grid gap-3">
+    <div className="flex gap-2"><MapPin size={18} className="mt-3 text-slate-400"/><input className="input" value={location} onChange={e=>setLocation(e.target.value)} placeholder="Stadium, city or ground"/></div>
+    <div className="flex gap-2"><input className="input" value={mapQuery} onChange={e=>setMapQuery(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();searchLocation()}}} placeholder="Search location on map..."/><button type="button" onClick={searchLocation} className="rounded-xl bg-slate-950 px-4 text-white" disabled={mapSearching}><Search size={17}/></button></div>
+    {mapResults.length>0&&<div className="grid gap-2 rounded-2xl border border-slate-200 p-2">{mapResults.map(r=><button type="button" key={r.lat+r.lon} onClick={()=>chooseLocation(r)} className="rounded-xl p-3 text-left text-sm font-bold hover:bg-slate-50">{r.display_name}</button>)}</div>}
+    {latitude&&longitude&&<iframe title="Selected match location" className="h-56 w-full rounded-2xl border-0" src={`https://www.openstreetmap.org/export/embed.html?bbox=${+longitude-0.02}%2C${+latitude-0.02}%2C${+longitude+0.02}%2C${+latitude+0.02}&layer=mapnik&marker=${latitude}%2C${longitude}`}/>}
+  </div>
+</Field>
+<input type="hidden" value={latitude}/><input type="hidden" value={longitude}/><Field label="Description" wide><textarea className="input" rows={4} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Optional match details"/></Field></section><button disabled={saving||teams.length<2} className="rounded-2xl bg-emerald-600 py-4 font-black text-white hover:bg-emerald-700 disabled:opacity-50">{saving?"Creating match...":"Create match"}</button>{teams.length<2&&<p className="text-center text-sm font-semibold text-slate-500">At least two teams are required.</p>}</form></div></main>
+}
+function Field({label,children,wide=false}:{label:string;children:ReactNode;wide?:boolean}){return <label className={`grid gap-2 ${wide?"md:col-span-2":""}`}><span className="text-sm font-black text-slate-700">{label}</span>{children}</label>}
+
+function countryOptions(){const names=new Intl.DisplayNames(["en"],{type:"region"});return Array.from({length:26*26},(_,i)=>{const a=Math.floor(i/26),b=i%26;return String.fromCharCode(65+a)+String.fromCharCode(65+b)}).map(c=>{try{return names.of(c)||""}catch{return ""}}).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).sort();}
