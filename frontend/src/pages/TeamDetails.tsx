@@ -28,7 +28,7 @@ export default function TeamDetails() {
   const owner = user?.id === team.owner_id;
 
   return (
-    <main className="min-h-screen bg-slate-50 px-4 py-6 md:px-6 md:py-10">
+    <main className="team-detail-page min-h-screen bg-slate-50 px-4 py-6 md:px-6 md:py-10">
       <div className="mx-auto max-w-6xl">
         <Link to="/teams" className="mb-5 inline-flex items-center gap-2 font-bold text-slate-500 hover:text-slate-900"><ArrowLeft size={16}/> Teams</Link>
 
