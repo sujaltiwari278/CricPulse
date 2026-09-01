@@ -63,18 +63,6 @@ def login(
         )
 
 
-@router.delete(
-    "/me",
-    status_code=status.HTTP_204_NO_CONTENT,
-)
-def delete_current_user(
-    user: User = Depends(current_user),
-    db: Session = Depends(get_db),
-):
-    AuthService.delete_account(db, user)
-    return None
-
-
 @router.get(
     "/me",
     response_model=UserResponse,

@@ -1304,71 +1304,261 @@ a:focus-visible, button:focus-visible, input:focus-visible{
 @media (max-width: 650px){
   .navbar:after{ opacity:.5; }
 }
-/* Player/profile polish + simplified navbar */
-.logo::before{display:none!important}
-.logo{display:inline-flex;align-items:center;gap:9px}
-.logo .navbar-logo{width:34px;height:34px;display:block;object-fit:contain;border-radius:50%;flex:0 0 auto}
-.profile-nudge{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:16px;padding:14px 16px;border:1px solid var(--parchment-deep);border-radius:16px;background:rgba(255,255,255,.92);box-shadow:0 8px 22px rgba(7,17,31,.045)}
-.profile-nudge>div{display:flex;align-items:baseline;gap:7px;min-width:0;flex-wrap:wrap}
-.profile-nudge strong{font-size:12px;color:var(--ink);font-weight:950}
-.profile-nudge span{font-size:11px;color:#897d73;font-weight:650}
-.profile-nudge a{display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;color:var(--emerald-deep);font-size:11px;font-weight:950;white-space:nowrap}
-.profile-nudge a:hover{color:var(--leather-dark)}
 
-.player-profile-page{min-height:calc(100vh - 68px);padding:30px 16px 64px;background:radial-gradient(circle at 8% 0%,#f7f1e9 0,#fbf9f6 30%,#f3f0ea 100%)}
-.player-profile-container{width:min(1180px,100%);margin:0 auto}
-.profile-back-link{display:inline-flex;align-items:center;gap:7px;margin-bottom:14px;color:#897d73;font-size:12px;font-weight:850}
-.profile-back-link:hover{color:var(--emerald-deep)}
-.player-profile-hero{overflow:hidden;border-radius:28px;background:linear-gradient(125deg,#0d1016,#121a24 52%,#11683f);color:#fff;box-shadow:0 22px 58px rgba(7,17,31,.14)}
-.player-profile-hero-main{display:flex;align-items:center;gap:18px;padding:30px 34px;position:relative}
-.player-profile-hero-main:after{content:"";position:absolute;right:-80px;top:-120px;width:300px;height:300px;border-radius:50%;background:rgba(58,226,151,.12);filter:blur(4px)}
-.player-profile-identity{min-width:0;position:relative;z-index:1}
-.player-profile-handle{margin:0 0 3px;color:#40e095;font-size:11px;font-weight:950}
-.player-profile-identity h1{margin:0;font-size:clamp(34px,5vw,56px);line-height:.98;letter-spacing:-.045em}
-.player-profile-tags{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
-.player-profile-tags>span{display:inline-flex;align-items:center;gap:5px;padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.10);color:#eef4f4;font-size:10px;font-weight:900}
-.profile-edit-button{position:relative;z-index:2;margin-left:auto;display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:11px 14px;border-radius:13px;background:#fff;color:#0f151d;font-size:12px;font-weight:950;white-space:nowrap}
-.profile-edit-button:hover{background:#f7f2eb}
-.player-profile-hero-stats{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid rgba(255,255,255,.1)}
-.hero-stat{padding:16px;text-align:center}
-.hero-stat p{margin:0;color:#9aa8af;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.11em}
-.hero-stat strong{display:block;margin-top:3px;font-size:25px;font-weight:950}
-.profile-style-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:15px}
-.profile-metric{display:flex;align-items:center;gap:11px;padding:14px 16px;border:1px solid var(--parchment-deep);border-radius:16px;background:#fff;box-shadow:0 8px 22px rgba(7,17,31,.045)}
-.profile-metric-icon{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#edf8f3;color:var(--emerald-deep);flex:0 0 auto}
-.profile-metric p{margin:0;color:#95887c;font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.08em}
-.profile-metric strong{display:block;margin-top:2px;color:var(--ink);font-size:15px;font-weight:950}
-.profile-card-grid{display:grid;grid-template-columns:1.35fr 1fr;gap:15px;margin-top:15px}
-.profile-card{border:1px solid var(--parchment-deep);border-radius:21px;background:#fff;padding:20px;box-shadow:0 10px 30px rgba(7,17,31,.045)}
-.profile-section-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
-.profile-section-heading>svg{color:var(--emerald-deep);margin-top:2px}
-.profile-kicker{margin:0;color:var(--emerald-deep);font-size:9px;font-weight:950;text-transform:uppercase;letter-spacing:.18em}
-.profile-section-heading h2{margin:3px 0 0;color:var(--ink);font-size:22px;font-weight:950;letter-spacing:-.025em}
-.profile-stat-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
-.profile-stat-grid-wide{grid-template-columns:repeat(3,minmax(0,1fr))}
-.profile-card-stat{padding:12px 13px;border-radius:13px;background:#f8faf9;border:1px solid #edf1ee}
-.profile-card-stat p{margin:0;color:#929ca2;font-size:8px;font-weight:950;letter-spacing:.08em;text-transform:uppercase}
-.profile-card-stat strong{display:block;margin-top:3px;color:var(--ink);font-size:17px;font-weight:950;line-height:1.1}
-.fielding-card{margin-top:15px}
-.fielding-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
-.profile-about-card{margin-top:15px}
-.profile-about-text{margin:7px 0 0;color:#6f756f;line-height:1.7;font-size:13px}
-.profile-error{padding:14px 16px;border:1px solid #edd8ce;border-radius:15px;background:#fbf0ec;color:#9a351e;font-weight:850}
-.player-profile-loading{text-align:center;padding:70px 20px;color:#897d73;font-weight:850}
+/* =========================================================
+   CricPulse — Unified UI Skin
+   Applies the current compact cricket/broadcast visual
+   language consistently to detail, form and utility pages.
+   ========================================================= */
 
-@media(max-width:900px){
-  .profile-card-grid{grid-template-columns:1fr}
+/* Brand in navbar */
+.logo{
+  display:inline-flex !important;
+  align-items:center !important;
+  gap:9px !important;
+  white-space:nowrap;
+  font-size:25px !important;
 }
-@media(max-width:650px){
-  .profile-nudge{align-items:flex-start;flex-direction:column}
-  .profile-nudge>div{display:block}
-  .profile-nudge span{display:block;margin-top:2px}
-  .player-profile-page{padding:18px 10px 50px}
-  .player-profile-hero-main{align-items:flex-start;flex-wrap:wrap;padding:22px}
-  .player-profile-photo{width:74px;height:74px;border-radius:20px;font-size:30px}
-  .player-profile-identity{flex:1 1 calc(100% - 100px)}
-  .profile-edit-button{margin-left:0;width:100%}
-  .player-profile-hero-stats{grid-template-columns:repeat(2,1fr)}
-  .profile-style-grid{grid-template-columns:1fr}
-  .profile-stat-grid-wide{grid-template-columns:repeat(2,minmax(0,1fr))}
+.logo:before{display:none !important;content:none !important}
+.navbar-logo{
+  width:38px !important;
+  height:38px !important;
+  object-fit:contain !important;
+  display:block !important;
+  border-radius:50% !important;
+  flex:0 0 38px;
+}
+.logo-wordmark{
+  color:var(--emerald, #147c4c) !important;
+  font-weight:400;
+}
+
+/* Shared page backdrop/container rhythm */
+.profile-page,
+.team-detail-page,
+.create-match-page{
+  background:
+    radial-gradient(circle at 8% 0%, rgba(181,130,42,.08), transparent 27%),
+    radial-gradient(circle at 100% 0%, rgba(20,124,76,.08), transparent 30%),
+    linear-gradient(180deg,#faf8f5 0%,#f5f1eb 100%) !important;
+}
+.profile-page > div,
+.team-detail-page > div{
+  width:min(1180px,100%);
+}
+
+/* Detail heroes */
+.profile-page section.overflow-hidden.rounded-\[2rem\].bg-slate-950,
+.team-detail-page section.overflow-hidden.rounded-\[2rem\].bg-slate-950{
+  border:1px solid rgba(255,255,255,.06);
+  background:
+    radial-gradient(circle at 82% 8%, rgba(209,162,76,.14), transparent 31%),
+    linear-gradient(130deg,#0d1016 0%,#171d28 54%,#0c5d3a 100%) !important;
+  box-shadow:0 24px 60px rgba(7,17,31,.14) !important;
+}
+.profile-page section.overflow-hidden.rounded-\[2rem\].bg-slate-950 > div:first-child,
+.team-detail-page section.overflow-hidden.rounded-\[2rem\].bg-slate-950 > div:first-child{
+  padding:26px 28px !important;
+}
+.profile-page .player-profile-photo,
+.team-detail-page .team-detail-logo{
+  border:2px solid rgba(255,255,255,.16);
+  box-shadow:0 16px 34px rgba(0,0,0,.16);
+}
+.profile-page .player-profile-photo{
+  width:88px;height:88px;border-radius:24px;
+}
+.team-detail-page .team-detail-logo{
+  width:88px;height:88px;border-radius:24px;
+}
+
+/* Stats strips */
+.profile-page section.grid.grid-cols-2.border-t,
+.team-detail-page section.grid.grid-cols-2.border-t{
+  background:rgba(0,0,0,.08);
+}
+.profile-page section.grid.grid-cols-2.border-t > div,
+.team-detail-page section.grid.grid-cols-2.border-t > div{
+  padding:15px 18px !important;
+}
+.profile-page section.grid.grid-cols-2.border-t p,
+.team-detail-page section.grid.grid-cols-2.border-t p{
+  margin:0 !important;
+  color:#b9c6cf !important;
+}
+
+/* Metric cards / content cards */
+.profile-page section.rounded-3xl.bg-white,
+.team-detail-page section.rounded-3xl.bg-white,
+.profile-page section.mt-6.rounded-3xl,
+.team-detail-page section.mt-6.rounded-3xl{
+  border:1px solid var(--parchment-deep,#ede7de) !important;
+  border-radius:20px !important;
+  background:rgba(255,255,255,.94) !important;
+  box-shadow:0 10px 28px rgba(7,17,31,.055) !important;
+}
+.profile-page section.mt-6.grid > div,
+.team-detail-page section.mt-6.grid > div{
+  border:1px solid #eee8df !important;
+  border-radius:17px !important;
+  background:#fff !important;
+  box-shadow:0 8px 22px rgba(7,17,31,.045) !important;
+}
+.profile-page section.mt-6.grid > div > div:first-child,
+.team-detail-page section.mt-6.grid > div > div:first-child{
+  color:#147c4c !important;
+}
+
+/* Consistent cards/buttons/inputs for create/edit forms */
+.create-match-page .create-container{
+  width:min(1180px,100%);
+}
+.create-match-page .create-hero{
+  margin-bottom:16px !important;
+}
+.create-match-page .create-layout,
+.create-match-page > .create-container > form{
+  gap:14px !important;
+}
+.create-match-page .form-card,
+.create-match-page > .create-container > form > section{
+  border:1px solid #ede7de !important;
+  border-radius:20px !important;
+  background:rgba(255,255,255,.96) !important;
+  box-shadow:0 10px 28px rgba(7,17,31,.055) !important;
+}
+.create-match-page .form-card-heading{
+  padding-bottom:12px !important;
+  border-bottom:1px solid #f0ece6;
+}
+.create-match-page label{
+  color:#75675b !important;
+}
+.create-match-page .input,
+.create-match-page input,
+.create-match-page textarea,
+.create-match-page select{
+  min-height:46px;
+  border:1px solid #e2ddd5 !important;
+  border-radius:12px !important;
+  background:#fcfbf9 !important;
+  color:#151a22 !important;
+  outline:none;
+  transition:border-color .16s ease,box-shadow .16s ease,background .16s ease;
+}
+.create-match-page textarea{min-height:110px}
+.create-match-page .input:focus,
+.create-match-page input:focus,
+.create-match-page textarea:focus,
+.create-match-page select:focus{
+  border-color:#168652 !important;
+  box-shadow:0 0 0 4px rgba(22,134,82,.08) !important;
+  background:#fff !important;
+}
+.create-match-page .form-submit,
+.create-match-page button[type="submit"]{
+  border-radius:13px !important;
+  background:linear-gradient(135deg,#0d1016,#185b3b) !important;
+  box-shadow:0 10px 22px rgba(13,16,22,.14) !important;
+}
+.create-match-page .form-submit:hover,
+.create-match-page button[type="submit"]:hover:not(:disabled){
+  background:linear-gradient(135deg,#147c4c,#0d5d39) !important;
+}
+
+/* Player + team directory cards become the same visual family */
+.player-card,.team-card,.match-directory-card{
+  background:rgba(255,255,255,.96) !important;
+  border:1px solid #e9e3da !important;
+  box-shadow:0 9px 24px rgba(7,17,31,.045) !important;
+}
+.player-card:hover,.team-card:hover,.match-directory-card:hover{
+  border-color:#84cda9 !important;
+  box-shadow:0 15px 32px rgba(20,124,76,.11) !important;
+}
+.player-card-name,.team-card h3{color:#121821 !important}
+.player-card-username,.team-location,.player-card-footer{color:#8c7e70 !important}
+
+/* Team-detail squad rows */
+.team-detail-page .group.flex.items-center{
+  border-color:#e9e4db !important;
+  background:#fcfbf9 !important;
+}
+.team-detail-page .group.flex.items-center:hover{
+  background:#fff !important;
+  border-color:#87cbaa !important;
+  box-shadow:0 10px 22px rgba(20,124,76,.08) !important;
+}
+
+/* Table polish across scorecards/profile pages */
+.profile-page table,
+.team-detail-page table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  overflow:hidden;
+  border:1px solid #ece7df;
+  border-radius:16px;
+}
+.profile-page th,.team-detail-page th{
+  background:#f7f4ee !important;
+  color:#77695d !important;
+  font-size:10px !important;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+}
+.profile-page td,.team-detail-page td{
+  color:#1a2029 !important;
+  border-color:#f0ece6 !important;
+}
+
+/* Generic utility buttons inside styled pages */
+.profile-page button,
+.team-detail-page button,
+.create-match-page button{
+  transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease,background .16s ease;
+}
+.profile-page a[class*="bg-white"],
+.team-detail-page a[class*="bg-white"]{
+  border:1px solid #e9e4dc !important;
+  box-shadow:0 8px 18px rgba(7,17,31,.08);
+}
+.profile-page a[class*="bg-white"]:hover,
+.team-detail-page a[class*="bg-white"]:hover{
+  border-color:#91d4b0 !important;
+  transform:translateY(-1px);
+}
+
+/* Error/loading states match current UI */
+.profile-page .bg-red-50,
+.team-detail-page .bg-red-50,
+.create-match-page .bg-red-50{
+  border:1px solid #efd9d0 !important;
+  border-radius:15px !important;
+  background:#f8ece7 !important;
+  color:#8d3023 !important;
+}
+.profile-page .text-slate-500,
+.team-detail-page .text-slate-500{
+  color:#8e8073 !important;
+}
+
+@media (max-width:900px){
+  .profile-page,
+  .team-detail-page,
+  .create-match-page{
+    padding:20px 12px 48px !important;
+  }
+  .profile-page section.overflow-hidden.rounded-\[2rem\].bg-slate-950 > div:first-child,
+  .team-detail-page section.overflow-hidden.rounded-\[2rem\].bg-slate-950 > div:first-child{
+    padding:20px !important;
+  }
+}
+@media (max-width:650px){
+  .logo{font-size:20px !important;gap:7px !important}
+  .navbar-logo{width:34px !important;height:34px !important;flex-basis:34px}
+  .profile-page .player-profile-photo,
+  .team-detail-page .team-detail-logo{
+    width:72px;height:72px;border-radius:20px;
+  }
 }
