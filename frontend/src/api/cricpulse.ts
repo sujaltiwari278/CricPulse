@@ -142,6 +142,47 @@ export interface AnalyticsInnings { innings_id:number; number:number; batting_te
 export interface MatchResultInnings { innings:number; team:MatchTeamBrief; runs:number; wickets:number; overs:string; status:string; }
 export interface MatchResult { match_id:number; status:MatchStatus; completed_at:string|null; result_type:string; result_text:string; winner:MatchTeamBrief|null; margin:number|null; target:number|null; runs_required:number|null; balls_remaining:number|null; required_run_rate:number|null; target_team:MatchTeamBrief|null; innings:MatchResultInnings[]; }
 
+
+export type TournamentStatus = "UPCOMING" | "ONGOING" | "COMPLETED";
+export interface TournamentTeamBrief {
+  id: number;
+  name: string;
+  short_name: string;
+  logo_url: string | null;
+  city: string | null;
+}
+export interface Tournament {
+  id: number;
+  creator_id: number;
+  name: string;
+  location: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  format: MatchFormat;
+  overs: number | null;
+  description: string | null;
+  status: TournamentStatus;
+  teams: TournamentTeamBrief[];
+  created_at: string;
+}
+export interface TournamentCreate {
+  name: string;
+  location?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  format: MatchFormat;
+  overs?: number | null;
+  description?: string | null;
+  team_ids: number[];
+}
+
+export const tournamentsApi = {
+  list: (q = "") => request<Tournament[]>(`/tournaments${q ? `?q=${encodeURIComponent(q)}` : ""}`),
+  get: (id: number) => request<Tournament>(`/tournaments/${id}`),
+  create: (data: TournamentCreate) => request<Tournament>("/tournaments", { method: "POST", body: JSON.stringify(data) }),
+  delete: (id: number) => request<void>(`/tournaments/${id}`, { method: "DELETE" }),
+};
+
 export const matchesApi = {
   list:(live=false)=>request<Match[]>(`/matches${live?"?live=true":""}`),
   get:(id:number)=>request<Match>(`/matches/${id}`),

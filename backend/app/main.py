@@ -6,7 +6,8 @@ from app.models.user import User
 from app.models.player import Player
 from app.models.team import Team, TeamMember
 from app.models.match import Match, MatchPlayer, Innings, Delivery
-from app.api.routes import auth, players, teams, matches
+from app.models.tournament import Tournament, TournamentTeam
+from app.api.routes import auth, players, teams, matches, tournaments
 
 
 Base.metadata.create_all(bind=engine)
@@ -51,6 +52,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(players.router, prefix="/api")
 app.include_router(teams.router, prefix="/api")
 app.include_router(matches.router, prefix="/api")
+app.include_router(tournaments.router, prefix="/api")
 
 
 @app.get("/")

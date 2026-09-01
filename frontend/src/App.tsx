@@ -15,7 +15,7 @@ import MatchDetails from "./pages/MatchDetails";
 import EditMatch from "./pages/EditMatch";
 import MatchScorer from "./pages/MatchScorer";
 import Matches from "./pages/Matches";
-import Live from "./pages/Live";
+import Tournaments from "./pages/Tournaments";
 
 export default function App() {
   return (
@@ -27,7 +27,7 @@ export default function App() {
           <Route path="/auth" element={<Auth />} />
           <Route path="/players" element={<Players />} />
           <Route path="/matches" element={<Matches />} />
-          <Route path="/live" element={<Live />} />
+          <Route path="/tournaments" element={<Tournaments />} />
           <Route path="/players/:id" element={<PlayerProfile />} />
           <Route path="/teams" element={<Teams />} />
           <Route path="/teams/:id" element={<TeamDetails />} />
