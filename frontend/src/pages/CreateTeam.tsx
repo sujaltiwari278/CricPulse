@@ -161,7 +161,6 @@ export default function CreateTeam() {
             <div className="mb-6 flex items-start justify-between gap-4">
               <div>
                 <p className="text-xs font-black uppercase tracking-[.22em] text-emerald-600">Team Identity</p>
-                <h2 className="mt-1 text-2xl font-black text-slate-950">Club details</h2>
                 <p className="mt-2 text-sm leading-6 text-slate-500">Set the basic identity shown throughout CricPulse.</p>
               </div>
               <div className="grid h-11 w-11 flex-shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-700">

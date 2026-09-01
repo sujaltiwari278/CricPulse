@@ -53,9 +53,6 @@ export default function PlayerProfile() {
 
           <div className="player-profile-hero-stats">
             <HeroStat label="Matches" value={stat(stats.matches)} />
-            <HeroStat label="Runs" value={stat(stats.runs)} />
-            <HeroStat label="Wickets" value={stat(stats.wickets)} />
-            <HeroStat label="Catches" value={stat(stats.catches)} />
           </div>
         </section>
 

@@ -112,7 +112,6 @@ export default function Home() {
             <h2>Live cricket, right now</h2>
             <p>Follow matches being scored on CricPulse in real time.</p>
           </div>
-          {isAuthenticated && <Link to="/matches/create" className="home-create-button"><Plus size={17} /> Create match</Link>}
         </div>
 
         {loading ? (
