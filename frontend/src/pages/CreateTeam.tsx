@@ -1,42 +1,309 @@
-import { ArrowLeft, MapPin, Search, Swords } from "lucide-react";
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { ArrowLeft, Camera, Check, Shield, Upload, Users } from "lucide-react";
+import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { matchesApi, teamsApi, type MatchFormat, type Team } from "../api/cricpulse";
+import { playersApi, teamsApi, type Player } from "../api/cricpulse";
 
-export default function CreateMatch() {
- const navigate=useNavigate(); const [teams,setTeams]=useState<Team[]>([]); const [teamA,setTeamA]=useState(""); const [teamB,setTeamB]=useState(""); const [format,setFormat]=useState<MatchFormat>("T20"); const [overs,setOvers]=useState("20"); const [days,setDays]=useState("5"); const [perDay,setPerDay]=useState("90"); const [venue,setVenue]=useState(""); const [location,setLocation]=useState(""); const [latitude,setLatitude]=useState(""); const [longitude,setLongitude]=useState(""); const [description,setDescription]=useState(""); const [error,setError]=useState(""); const [saving,setSaving]=useState(false);
- const [country,setCountry]=useState("");
- const [mapQuery,setMapQuery]=useState("");
- const [mapResults,setMapResults]=useState<{display_name:string;lat:string;lon:string}[]>([]);
- const [mapSearching,setMapSearching]=useState(false);
- const countries=countryOptions();
- useEffect(()=>{teamsApi.list().then(setTeams).catch(e=>setError(e instanceof Error?e.message:"Unable to load teams."));},[]);
- async function searchLocation(){
-   if(!mapQuery.trim()) return;
-   try{setMapSearching(true);setError("");
-     const r=await fetch(`https://photon.komoot.io/api/?q=${encodeURIComponent(mapQuery)}&limit=6`);
-     const j=await r.json();
-     setMapResults((j.features??[]).map((f:any)=>({display_name:f.properties?.name ? [f.properties.name,f.properties.city,f.properties.country].filter(Boolean).join(", ") : (f.properties?.country??mapQuery),lat:String(f.geometry.coordinates[1]),lon:String(f.geometry.coordinates[0])})));
-   }catch{setError("Unable to search this location. Try the city or stadium name.");}finally{setMapSearching(false);}
- }
- function chooseLocation(r:{display_name:string;lat:string;lon:string}){
-   setLocation(r.display_name); setLatitude(r.lat); setLongitude(r.lon);
-   const parts=r.display_name.split(",").map(x=>x.trim()); const last=parts.at(-1);
-   if(last && countries.includes(last)) setCountry(last);
-   setMapResults([]);
- }
- async function submit(e:FormEvent){e.preventDefault();setError("");if(!teamA||!teamB)return setError("Select both teams.");if(teamA===teamB)return setError("A match must have two different teams.");try{setSaving(true);const data=format==="TEST"?{team_a_id:+teamA,team_b_id:+teamB,format,test_days:+days,overs_per_day:+perDay,venue:venue||undefined,location:location||country||undefined,latitude:latitude?+latitude:undefined,longitude:longitude?+longitude:undefined,description:description||undefined}:{team_a_id:+teamA,team_b_id:+teamB,format,overs:+overs,venue:venue||undefined,location:location||country||undefined,latitude:latitude?+latitude:undefined,longitude:longitude?+longitude:undefined,description:description||undefined};const m=await matchesApi.create(data);navigate(`/matches/${m.id}`);}catch(e){setError(e instanceof Error?e.message:"Unable to create match.")}finally{setSaving(false)}}
- return <main className="create-page create-match-page"><div className="mx-auto max-w-4xl"><Link to="/teams" className="mb-5 inline-flex items-center gap-2 font-bold text-slate-500"><ArrowLeft size={16}/>Back</Link><div className="mb-6 rounded-3xl bg-slate-950 p-7 text-white md:p-10"><div className="flex items-center gap-4"><div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500 text-slate-950"><Swords/></div><div><p className="text-xs font-black uppercase tracking-[.25em] text-emerald-400">Match Centre</p><h1 className="text-3xl font-black md:text-4xl">Create a real match.</h1></div></div><p className="mt-4 text-slate-300">Use real registered teams. The toss is generated on the server and match settings lock after start.</p></div>{error&&<div className="mb-5 rounded-2xl bg-red-50 p-4 font-semibold text-red-700">{error}</div>}<form onSubmit={submit} className="grid gap-6"><section className="grid gap-5 rounded-3xl bg-white p-6 shadow-sm md:grid-cols-2 md:p-8"><Field label="Team A"><select required value={teamA} onChange={e=>setTeamA(e.target.value)} className="input"><option value="">Select team</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name} ({t.short_name})</option>)}</select></Field><Field label="Team B"><select required value={teamB} onChange={e=>setTeamB(e.target.value)} className="input"><option value="">Select team</option>{teams.map(t=><option key={t.id} value={t.id}>{t.name} ({t.short_name})</option>)}</select></Field><Field label="Format"><select value={format} onChange={e=>{const f=e.target.value as MatchFormat;setFormat(f);if(f==="T20")setOvers("20");if(f==="ODI")setOvers("50");if(f==="CUSTOM")setOvers("10")}} className="input"><option value="T20">T20 — 20 overs</option><option value="ODI">ODI — 50 overs</option><option value="CUSTOM">Custom overs</option><option value="TEST">Test match</option></select></Field>{format!=="TEST"?<Field label="Overs"><input className="input" type="number" min={4} max={1000} required value={overs} onChange={e=>setOvers(e.target.value)}/></Field>:<><Field label="Test days"><select className="input" value={days} onChange={e=>setDays(e.target.value)}>{[1,2,3,4,5].map(n=><option key={n}>{n}</option>)}</select></Field><Field label="Overs per day"><input className="input" type="number" min={1} max={300} required value={perDay} onChange={e=>setPerDay(e.target.value)}/></Field></>}<Field label="Venue"><input className="input" value={venue} onChange={e=>setVenue(e.target.value)} placeholder="Stadium / ground"/></Field><Field label="Country"><select className="input" value={country} onChange={e=>setCountry(e.target.value)}><option value="">Select country</option>{countries.map(c=><option key={c}>{c}</option>)}</select></Field>
-<Field label="Match location" wide>
-  <div className="grid gap-3">
-    <div className="flex gap-2"><MapPin size={18} className="mt-3 text-slate-400"/><input className="input" value={location} onChange={e=>setLocation(e.target.value)} placeholder="Stadium, city or ground"/></div>
-    <div className="flex gap-2"><input className="input" value={mapQuery} onChange={e=>setMapQuery(e.target.value)} onKeyDown={e=>{if(e.key==="Enter"){e.preventDefault();searchLocation()}}} placeholder="Search location on map..."/><button type="button" onClick={searchLocation} className="rounded-xl bg-slate-950 px-4 text-white" disabled={mapSearching}><Search size={17}/></button></div>
-    {mapResults.length>0&&<div className="grid gap-2 rounded-2xl border border-slate-200 p-2">{mapResults.map(r=><button type="button" key={r.lat+r.lon} onClick={()=>chooseLocation(r)} className="rounded-xl p-3 text-left text-sm font-bold hover:bg-slate-50">{r.display_name}</button>)}</div>}
-    {latitude&&longitude&&<iframe title="Selected match location" className="h-56 w-full rounded-2xl border-0" src={`https://www.openstreetmap.org/export/embed.html?bbox=${+longitude-0.02}%2C${+latitude-0.02}%2C${+longitude+0.02}%2C${+latitude+0.02}&layer=mapnik&marker=${latitude}%2C${longitude}`}/>}
-  </div>
-</Field>
-<input type="hidden" value={latitude}/><input type="hidden" value={longitude}/><Field label="Description" wide><textarea className="input" rows={4} value={description} onChange={e=>setDescription(e.target.value)} placeholder="Optional match details"/></Field></section><button disabled={saving||teams.length<2} className="rounded-2xl bg-emerald-600 py-4 font-black text-white hover:bg-emerald-700 disabled:opacity-50">{saving?"Creating match...":"Create match"}</button>{teams.length<2&&<p className="text-center text-sm font-semibold text-slate-500">At least two teams are required.</p>}</form></div></main>
+const COUNTRIES = [
+  "India",
+  "Australia",
+  "England",
+  "New Zealand",
+  "South Africa",
+  "Pakistan",
+  "Sri Lanka",
+  "Bangladesh",
+  "Afghanistan",
+  "West Indies",
+  "Ireland",
+  "Zimbabwe",
+  "Nepal",
+  "United States",
+  "United Arab Emirates",
+  "Canada",
+  "Netherlands",
+  "Scotland",
+];
+
+export default function CreateTeam() {
+  const navigate = useNavigate();
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [selected, setSelected] = useState<number[]>([]);
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [form, setForm] = useState({
+    name: "",
+    short_name: "",
+    city: "",
+    country: "India",
+    description: "",
+    logo_url: "",
+  });
+
+  async function searchPlayers() {
+    try {
+      setSearching(true);
+      setError("");
+      setPlayers(await playersApi.search(query.trim()));
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to search players.");
+    } finally {
+      setSearching(false);
+    }
+  }
+
+  function togglePlayer(id: number) {
+    setSelected((current) => {
+      if (current.includes(id)) return current.filter((value) => value !== id);
+      if (current.length >= 11) return current;
+      setError("");
+      return [...current, id];
+    });
+  }
+
+  function handleLogo(file?: File) {
+    if (!file) return;
+    if (file.size > 1_500_000) {
+      setError("Logo must be under 1.5 MB.");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => setForm((current) => ({ ...current, logo_url: String(reader.result || "") }));
+    reader.readAsDataURL(file);
+  }
+
+  async function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError("");
+
+    if (!form.name.trim() || !form.short_name.trim()) {
+      setError("Team name and short name are required.");
+      return;
+    }
+
+    if (selected.length < 5) {
+      setError("Select at least 5 players.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const team = await teamsApi.create({
+        ...form,
+        name: form.name.trim(),
+        short_name: form.short_name.trim(),
+        city: form.city.trim(),
+        country: form.country,
+        description: form.description.trim(),
+        player_ids: selected,
+      });
+      navigate(`/teams/${team.id}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Unable to create team.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <main className="min-h-screen bg-slate-50 px-4 py-8 md:px-6">
+      <div className="mx-auto max-w-5xl">
+        <Link to="/teams" className="mb-5 inline-flex items-center gap-2 font-bold text-slate-500 hover:text-slate-900">
+          <ArrowLeft size={16} />
+          Teams
+        </Link>
+
+        <section className="mb-6 overflow-hidden rounded-3xl bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-900 p-6 text-white shadow-[0_20px_55px_rgba(7,17,31,.16)] md:p-8">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-4">
+              <label className="relative flex h-16 w-16 flex-shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-white/15 bg-emerald-400 text-slate-950 shadow-lg">
+                <input type="file" accept="image/*" className="absolute inset-0 cursor-pointer opacity-0" onChange={(event) => handleLogo(event.target.files?.[0])} />
+                {form.logo_url ? (
+                  <img src={form.logo_url} alt="Team logo" className="h-full w-full object-cover" />
+                ) : (
+                  <Camera size={27} />
+                )}
+                <span className="absolute bottom-1 right-1 grid h-5 w-5 place-items-center rounded-md bg-white text-emerald-700 shadow">
+                  <Upload size={11} />
+                </span>
+              </label>
+
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.25em] text-emerald-400">Team Centre</p>
+                <h1 className="mt-1 text-3xl font-black tracking-tight md:text-4xl">Create your cricket team.</h1>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300 md:text-base">
+                  Build a real squad, add its identity, and choose the players who can appear in your matches.
+                </p>
+              </div>
+            </div>
+
+            <div className="min-w-[130px] rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
+              <p className="text-[10px] font-black uppercase tracking-[.18em] text-slate-400">Squad</p>
+              <div className="mt-1 flex items-end gap-2">
+                <strong className="text-3xl font-black">{selected.length}</strong>
+                <span className="pb-1 text-sm text-slate-400">/ 11</span>
+              </div>
+              <p className="text-xs text-emerald-300">Minimum 5 players</p>
+            </div>
+          </div>
+        </section>
+
+        {error && (
+          <div className="mb-5 rounded-2xl border border-red-200 bg-red-50 p-4 font-semibold text-red-700">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={submit} className="grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+          <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-7">
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.22em] text-emerald-600">Team Identity</p>
+                <h2 className="mt-1 text-2xl font-black text-slate-950">Club details</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Set the basic identity shown throughout CricPulse.</p>
+              </div>
+              <div className="grid h-11 w-11 flex-shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+                <Shield size={21} />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <Field label="Team name">
+                <input
+                  required
+                  className="input"
+                  value={form.name}
+                  onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
+                  placeholder="Mumbai Tigers"
+                />
+              </Field>
+
+              <Field label="Short name">
+                <input
+                  required
+                  maxLength={10}
+                  className="input uppercase"
+                  value={form.short_name}
+                  onChange={(event) => setForm((current) => ({ ...current, short_name: event.target.value.toUpperCase() }))}
+                  placeholder="MT"
+                />
+              </Field>
+
+              <Field label="Country">
+                <select className="input" value={form.country} onChange={(event) => setForm((current) => ({ ...current, country: event.target.value }))}>
+                  {COUNTRIES.map((country) => <option key={country}>{country}</option>)}
+                </select>
+              </Field>
+
+              <Field label="City">
+                <input
+                  className="input"
+                  value={form.city}
+                  onChange={(event) => setForm((current) => ({ ...current, city: event.target.value }))}
+                  placeholder="Mumbai"
+                />
+              </Field>
+
+              <Field label="Description">
+                <textarea
+                  className="input"
+                  rows={4}
+                  value={form.description}
+                  onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+                  placeholder="A short description of your club."
+                />
+              </Field>
+            </div>
+
+            <button type="submit" disabled={saving || selected.length < 5} className="mt-6 w-full rounded-2xl bg-emerald-600 py-4 font-black text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50">
+              {saving ? "Creating team…" : "Create team"}
+            </button>
+          </section>
+
+          <section className="min-w-0 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-7">
+            <div className="mb-6 flex items-start justify-between gap-4">
+              <div>
+                <p className="text-xs font-black uppercase tracking-[.22em] text-emerald-600">Squad Selection</p>
+                <h2 className="mt-1 text-2xl font-black text-slate-950">Choose 5–11 players</h2>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Search real CricPulse profiles and tap players to add them to your squad.</p>
+              </div>
+              <div className="grid h-11 w-11 flex-shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
+                <Users size={21} />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-slate-50 p-2">
+              <input
+                className="min-w-0 flex-1 border-0 bg-transparent px-2 py-2.5 text-sm font-semibold text-slate-900 outline-none placeholder:text-slate-400"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") {
+                    event.preventDefault();
+                    void searchPlayers();
+                  }
+                }}
+                placeholder="Search player name or username"
+              />
+              <button type="button" onClick={() => void searchPlayers()} disabled={searching} className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-black text-white transition hover:bg-slate-800 disabled:opacity-50">
+                {searching ? "Searching…" : "Search"}
+              </button>
+            </div>
+
+            {players.length === 0 ? (
+              <div className="mt-4 grid min-h-[300px] place-items-center rounded-2xl border border-dashed border-slate-200 bg-slate-50 p-8 text-center">
+                <div>
+                  <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
+                    <Users size={25} />
+                  </div>
+                  <h3 className="mt-4 text-base font-black text-slate-800">Search for real players</h3>
+                  <p className="mt-1 text-sm text-slate-500">Players must have a CricPulse profile before they can join the team.</p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {players.map((player) => {
+                  const chosen = selected.includes(player.id);
+                  return (
+                    <button
+                      type="button"
+                      key={player.id}
+                      onClick={() => togglePlayer(player.id)}
+                      className={`flex items-center gap-3 rounded-2xl border p-3 text-left transition ${chosen ? "border-emerald-400 bg-emerald-50" : "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-emerald-200 hover:shadow-sm"}`}
+                    >
+                      <span className="grid h-11 w-11 flex-shrink-0 place-items-center overflow-hidden rounded-xl bg-emerald-100 font-black text-emerald-800">
+                        {player.photo_url ? <img src={player.photo_url} alt="" className="h-full w-full object-cover" /> : player.display_name[0]}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <strong className="block truncate text-sm text-slate-900">{player.display_name}</strong>
+                        <span className="mt-0.5 block truncate text-xs font-bold text-emerald-700">@{player.username}</span>
+                        <span className="mt-1 block text-[11px] font-semibold text-slate-400">{player.role || "Player"}</span>
+                      </span>
+                      {chosen && <Check size={18} className="flex-shrink-0 text-emerald-700" />}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="mt-5 flex flex-col gap-2 border-t border-slate-100 pt-4 text-xs font-bold text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+              <span>Minimum 5 · Maximum 11</span>
+              <span className="text-emerald-700">{selected.length} selected</span>
+            </div>
+          </section>
+        </form>
+      </div>
+    </main>
+  );
 }
-function Field({label,children,wide=false}:{label:string;children:ReactNode;wide?:boolean}){return <label className={`grid gap-2 ${wide?"md:col-span-2":""}`}><span className="text-sm font-black text-slate-700">{label}</span>{children}</label>}
 
-function countryOptions(){const names=new Intl.DisplayNames(["en"],{type:"region"});return Array.from({length:26*26},(_,i)=>{const a=Math.floor(i/26),b=i%26;return String.fromCharCode(65+a)+String.fromCharCode(65+b)}).map(c=>{try{return names.of(c)||""}catch{return ""}}).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).sort();}
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <label className="grid gap-2">
+      <span className="text-xs font-black uppercase tracking-[.08em] text-slate-600">{label}</span>
+      {children}
+    </label>
+  );
+}
