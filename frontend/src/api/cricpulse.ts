@@ -1,4 +1,4 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
+const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
 
 function getAccessToken(): string | null {
   return localStorage.getItem("cricpulse_token");
@@ -54,6 +54,11 @@ export interface PlayerStats {
   overs_bowled: string;
   runs_conceded: number;
   economy: number;
+  fifties: number;
+  hundreds: number;
+  best_bowling_figures: string;
+  three_wicket_hauls: number;
+  five_wicket_hauls: number;
   catches: number;
   run_outs: number;
 }
@@ -99,6 +104,7 @@ export const playersApi = {
     request<Player>("/players/me", { method: "POST", body: JSON.stringify(data) }),
   update: (data: { display_name?: string; role?: string | null; batting_style?: string | null; bowling_style?: string | null; location?: string | null; bio?: string | null; photo_url?: string | null; country?: string | null }) =>
     request<Player>("/players/me", { method: "PUT", body: JSON.stringify(data) }),
+  deleteMe: () => request<void>("/players/me", { method: "DELETE" }),
 };
 
 export const teamsApi = {
@@ -113,8 +119,6 @@ export const teamsApi = {
     request<Team>(`/teams/${id}/members`, { method: "POST", body: JSON.stringify({ player_id }) }),
   removeMember: (id: number, player_id: number) =>
     request<Team>(`/teams/${id}/members/${player_id}`, { method: "DELETE" }),
-  delete: (id: number) =>
-    request<{ message: string }>(`/teams/${id}`, { method: "DELETE" }),
 };
 
 export type MatchFormat = "T20" | "ODI" | "CUSTOM" | "TEST";
@@ -137,6 +141,47 @@ export interface AnalyticsBatter { player_id:number; player_name:string; runs:nu
 export interface AnalyticsInnings { innings_id:number; number:number; batting_team:MatchTeamBrief; runs:number; wickets:number; overs:string; over_series:AnalyticsOver[]; worm:AnalyticsWormPoint[]; batters:AnalyticsBatter[]; }
 export interface MatchResultInnings { innings:number; team:MatchTeamBrief; runs:number; wickets:number; overs:string; status:string; }
 export interface MatchResult { match_id:number; status:MatchStatus; completed_at:string|null; result_type:string; result_text:string; winner:MatchTeamBrief|null; margin:number|null; target:number|null; runs_required:number|null; balls_remaining:number|null; required_run_rate:number|null; target_team:MatchTeamBrief|null; innings:MatchResultInnings[]; }
+
+
+export type TournamentStatus = "UPCOMING" | "ONGOING" | "COMPLETED";
+export interface TournamentTeamBrief {
+  id: number;
+  name: string;
+  short_name: string;
+  logo_url: string | null;
+  city: string | null;
+}
+export interface Tournament {
+  id: number;
+  creator_id: number;
+  name: string;
+  location: string | null;
+  start_date: string | null;
+  end_date: string | null;
+  format: MatchFormat;
+  overs: number | null;
+  description: string | null;
+  status: TournamentStatus;
+  teams: TournamentTeamBrief[];
+  created_at: string;
+}
+export interface TournamentCreate {
+  name: string;
+  location?: string | null;
+  start_date?: string | null;
+  end_date?: string | null;
+  format: MatchFormat;
+  overs?: number | null;
+  description?: string | null;
+  team_ids: number[];
+}
+
+export const tournamentsApi = {
+  list: (q = "") => request<Tournament[]>(`/tournaments${q ? `?q=${encodeURIComponent(q)}` : ""}`),
+  get: (id: number) => request<Tournament>(`/tournaments/${id}`),
+  create: (data: TournamentCreate) => request<Tournament>("/tournaments", { method: "POST", body: JSON.stringify(data) }),
+  delete: (id: number) => request<void>(`/tournaments/${id}`, { method: "DELETE" }),
+};
 
 export const matchesApi = {
   list:(live=false)=>request<Match[]>(`/matches${live?"?live=true":""}`),
