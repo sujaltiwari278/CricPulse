@@ -66,7 +66,7 @@ export default function PlayerProfile() {
             <div className="profile-section-heading">
               <div>
                 <p className="profile-kicker">Career batting</p>
-
+                <h2>Batting card</h2>
               </div>
               <Trophy size={20} />
             </div>
@@ -89,6 +89,7 @@ export default function PlayerProfile() {
             <div className="profile-section-heading">
               <div>
                 <p className="profile-kicker">Career bowling</p>
+                <h2>Bowling card</h2>
               </div>
               <Crosshair size={20} />
             </div>
@@ -108,6 +109,7 @@ export default function PlayerProfile() {
           <div className="profile-section-heading">
             <div>
               <p className="profile-kicker">Fielding</p>
+              <h2>Fielding record</h2>
             </div>
             <ShieldCheck size={20} />
           </div>
