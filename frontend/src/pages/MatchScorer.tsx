@@ -311,7 +311,7 @@ export default function MatchScorer() {
       setFlipping(true);
       setError("");
       await new Promise((resolve) => window.setTimeout(resolve, 1200));
-      const callerTeamId = tossCallerTeamId || teamAId;
+      const callerTeamId = tossCallerTeamId;
       const result = await matchesApi.toss(matchId, callerTeamId, call);
       setMatch(result.match);
       setTossText(`${result.winner_team_name} won the toss · ${result.result}`);
@@ -998,11 +998,12 @@ export default function MatchScorer() {
                     <label className="mt-4 grid gap-2 text-sm font-black text-slate-700">
                       Toss caller
                       <select
-                        value={tossCallerTeamId || teamAId}
+                        value={tossCallerTeamId}
                         onChange={(event) => setTossCallerTeamId(Number(event.target.value))}
                         disabled={busy}
                         className="input"
                       >
+                        <option value={0}>Select team</option>
                         <option value={teamAId}>{match.team_a.name}</option>
                         <option value={teamBId}>{match.team_b.name}</option>
                       </select>
@@ -1042,7 +1043,7 @@ export default function MatchScorer() {
 
                     <button
                       onClick={toss}
-                      disabled={busy}
+                      disabled={busy || !tossCallerTeamId}
                       className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 py-4 font-black text-white disabled:opacity-50"
                     >
                       <CircleDot size={18} />
