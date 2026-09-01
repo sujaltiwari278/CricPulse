@@ -35,6 +35,15 @@ def update_my_player(data: PlayerUpdate, user: User = Depends(current_user), db:
         raise HTTPException(status_code=404, detail=str(exc))
 
 
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+def delete_my_player(user: User = Depends(current_user), db: Session = Depends(get_db)):
+    try:
+        PlayerService.delete(db, user.id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc))
+    return None
+
+
 @router.get("/search", response_model=list[PlayerResponse])
 def search_players(q: str | None = Query(None, max_length=100), db: Session = Depends(get_db)):
     return PlayerService.search(db, q)

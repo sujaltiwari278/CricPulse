@@ -104,6 +104,7 @@ export const playersApi = {
     request<Player>("/players/me", { method: "POST", body: JSON.stringify(data) }),
   update: (data: { display_name?: string; role?: string | null; batting_style?: string | null; bowling_style?: string | null; location?: string | null; bio?: string | null; photo_url?: string | null; country?: string | null }) =>
     request<Player>("/players/me", { method: "PUT", body: JSON.stringify(data) }),
+  deleteMe: () => request<void>("/players/me", { method: "DELETE" }),
 };
 
 export const teamsApi = {
