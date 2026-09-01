@@ -71,6 +71,7 @@ export default function MatchScorer() {
 
   // Toss
   const [call, setCall] = useState<"HEADS" | "TAILS">("HEADS");
+  const [tossCallerTeamId, setTossCallerTeamId] = useState(0);
   const [tossText, setTossText] = useState("");
   const [flipping, setFlipping] = useState(false);
 
@@ -310,7 +311,8 @@ export default function MatchScorer() {
       setFlipping(true);
       setError("");
       await new Promise((resolve) => window.setTimeout(resolve, 1200));
-      const result = await matchesApi.toss(matchId, teamAId, call);
+      const callerTeamId = tossCallerTeamId || teamAId;
+      const result = await matchesApi.toss(matchId, callerTeamId, call);
       setMatch(result.match);
       setTossText(`${result.winner_team_name} won the toss · ${result.result}`);
     } catch (err) {
@@ -884,8 +886,7 @@ export default function MatchScorer() {
 
         {/* PRE MATCH */}
         {match.status !== "LIVE" &&
-          match.status !== "INNINGS_BREAK" &&
-          match.status !== "COMPLETED" && (
+          match.status !== "INNINGS_BREAK" && (
             <section className="mt-5 grid gap-5 lg:grid-cols-2">
 
               {/* PLAYING XI */}
@@ -991,8 +992,22 @@ export default function MatchScorer() {
                 {match.status === "CREATED" && (
                   <>
                     <p className="mt-2 text-sm text-slate-500">
-                      {match.team_a.name} will call the toss. Choose a side, then flip.
+                      Choose which team will call the toss, then choose heads or tails.
                     </p>
+
+                    <label className="mt-4 grid gap-2 text-sm font-black text-slate-700">
+                      Toss caller
+                      <select
+                        value={tossCallerTeamId || teamAId}
+                        onChange={(event) => setTossCallerTeamId(Number(event.target.value))}
+                        disabled={busy}
+                        className="input"
+                      >
+                        <option value={teamAId}>{match.team_a.name}</option>
+                        <option value={teamBId}>{match.team_b.name}</option>
+                      </select>
+                    </label>
+
                     <div className={`toss-coin ${flipping ? "is-flipping" : ""}`}>
                       <span>{flipping ? "" : match.toss_result === "HEADS" ? "H" : match.toss_result === "TAILS" ? "T" : call === "HEADS" ? "H" : "T"}</span>
                     </div>
