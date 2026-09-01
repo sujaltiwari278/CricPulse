@@ -11,6 +11,26 @@ export default function Teams() {
   useEffect(() => { void load(); }, []);
   async function search(e: React.FormEvent) { e.preventDefault(); await load(query.trim()); }
   return <main className="directory-page">
+    <style>{`
+      .teams-hero .team-visual{
+        position:relative;
+        display:grid;
+        place-items:center;
+        min-height:260px;
+      }
+      .teams-hero .team-score-chip{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        gap:7px;
+        line-height:1;
+        white-space:nowrap;
+      }
+      .teams-hero .team-score-chip svg{
+        display:block;
+        flex:0 0 auto;
+      }
+    `}</style>
     <div className="directory-container">
       <section className="directory-hero teams-hero">
         <div className="directory-hero-copy"><span className="directory-kicker"><Shield size={14}/> GLOBAL CLUB NETWORK</span><h1>Find your<br/><span>cricket tribe.</span></h1><p>Create real squads from registered players, then take them into live matches. No dummy teams, no fake rosters.</p><div className="directory-actions">{isAuthenticated && <Link to="/teams/create" className="directory-primary"><Plus size={17}/>Create a team</Link>}<div className="directory-proof"><Users size={16}/><span>5–11 real players per squad</span></div></div></div>
