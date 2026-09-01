@@ -54,6 +54,11 @@ export interface PlayerStats {
   overs_bowled: string;
   runs_conceded: number;
   economy: number;
+  fifties: number;
+  hundreds: number;
+  best_bowling_figures: string;
+  three_wicket_hauls: number;
+  five_wicket_hauls: number;
   catches: number;
   run_outs: number;
 }
