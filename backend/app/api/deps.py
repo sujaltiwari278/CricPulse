@@ -31,10 +31,10 @@ def current_user(
         select(User).where(User.id == user_id)
     )
 
-    if user is None:
+    if user is None or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User no longer exists.",
+            detail="User account is inactive or no longer exists.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 

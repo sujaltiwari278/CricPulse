@@ -1,3 +1,5 @@
+import secrets
+
 from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
@@ -6,6 +8,7 @@ from app.core.security import (
     hash_password,
     verify_password,
 )
+from app.models.player import Player
 from app.models.user import User
 from app.schemas.auth import (
     AuthResponse,
@@ -59,6 +62,32 @@ class AuthService:
         )
 
     @staticmethod
+    def delete_account(
+        db: Session,
+        user: User,
+    ) -> None:
+        # Preserve match/team history while removing the user's ability to
+        # authenticate and anonymizing their personal/profile information.
+        player = db.scalar(select(Player).where(Player.user_id == user.id))
+        if player:
+            player.display_name = "Deleted Player"
+            player.role = None
+            player.batting_style = None
+            player.bowling_style = None
+            player.location = None
+            player.bio = None
+            player.photo_url = None
+            player.country = None
+
+        user.is_active = False
+        user.name = "Deleted User"
+        user.username = f"deleted_{user.id}"
+        user.email = f"deleted_{user.id}@cricpulse.invalid"
+        user.password_hash = hash_password(secrets.token_urlsafe(48))
+
+        db.commit()
+
+    @staticmethod
     def login(
         db: Session,
         data: LoginRequest,
@@ -74,7 +103,7 @@ class AuthService:
             )
         )
 
-        if not user:
+        if not user or not user.is_active:
             raise ValueError(
                 "Invalid username/email or password."
             )

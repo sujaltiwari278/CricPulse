@@ -54,11 +54,6 @@ export interface PlayerStats {
   overs_bowled: string;
   runs_conceded: number;
   economy: number;
-  fifties: number;
-  hundreds: number;
-  best_bowling_figures: string;
-  three_wicket_hauls: number;
-  five_wicket_hauls: number;
   catches: number;
   run_outs: number;
 }
@@ -94,6 +89,10 @@ export interface TeamStats {
   runs_against: number;
   win_percentage: number;
 }
+
+export const authApi = {
+  deleteAccount: () => request<void>("/auth/me", { method: "DELETE" }),
+};
 
 export const playersApi = {
   search: (q = "") => request<Player[]>(`/players/search${q ? `?q=${encodeURIComponent(q)}` : ""}`),
