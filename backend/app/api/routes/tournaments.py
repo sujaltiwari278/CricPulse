@@ -4,7 +4,6 @@ from app.api.deps import current_user
 from app.core.database import get_db
 from app.schemas.tournament import TournamentCreate, TournamentResponse
 from app.services.tournament_service import TournamentService
-from app.services.award_service import AwardService
 from app.models.user import User
 
 router = APIRouter(prefix="/tournaments", tags=["Tournaments"])

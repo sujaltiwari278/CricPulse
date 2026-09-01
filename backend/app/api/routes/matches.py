@@ -86,11 +86,6 @@ def start_innings(match_id: int, data: InningsStartRequest, user: User = Depends
         return ScoringService.start_innings(db, match, data)
     except (PermissionError, ValueError) as exc: fail(exc)
 
-@router.get("/{match_id}/awards")
-def match_awards(match_id: int, db: Session = Depends(get_db)):
-    try: return AwardService.match(db, match_id)
-    except ValueError as exc: raise HTTPException(status_code=404, detail=str(exc))
-
 @router.get("/{match_id}/scorecard")
 def match_scorecard(match_id: int, db: Session = Depends(get_db)):
     scorecard = ScorecardService.build(db, match_id)
