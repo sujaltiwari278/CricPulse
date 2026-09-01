@@ -24,7 +24,33 @@ export default function Tournaments() {
   const [saving, setSaving] = useState(false);
   const visible = useMemo(() => items.filter(t => filter === "ALL" || t.status === filter).filter(t => t.name.toLowerCase().includes(q.toLowerCase())), [items, filter, q]);
 
-  useEffect(() => { Promise.all([tournamentsApi.list(), teamsApi.list()]).then(([ts, tsTeams]) => { setItems(ts); setTeams(tsTeams); }).catch(() => setToast("Unable to load tournaments.")).finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    let mounted = true;
+
+    Promise.allSettled([tournamentsApi.list(), teamsApi.list()])
+      .then(([tournamentsResult, teamsResult]) => {
+        if (!mounted) return;
+
+        if (tournamentsResult.status === "fulfilled") {
+          setItems(tournamentsResult.value);
+        } else {
+          setToast("Unable to load tournaments.");
+        }
+
+        if (teamsResult.status === "fulfilled") {
+          setTeams(teamsResult.value);
+        } else {
+          setToast("Unable to load your teams.");
+        }
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   function update(k: string, v: string) { setForm(f => ({ ...f, [k]: v })); }
   function toggleTeam(id: number) { setForm(f => ({ ...f, team_ids: f.team_ids.includes(id) ? f.team_ids.filter(x => x !== id) : [...f.team_ids, id] })); }
@@ -88,7 +114,25 @@ export default function Tournaments() {
           {form.format !== "TEST" && <label>Overs per match<input type="number" min="4" value={form.overs} onChange={e => update("overs", e.target.value)}/></label>}
           <label className="wide-field">Description<textarea rows={3} value={form.description} onChange={e => update("description", e.target.value)} placeholder="Tell teams what this tournament is about."/></label>
         </div>
-        <div className="tournament-team-picker"><div className="tournament-picker-head"><strong>Select teams</strong><small>{form.team_ids.length} selected</small></div><div className="tournament-team-options">{teams.map(team => <button type="button" key={team.id} className={form.team_ids.includes(team.id) ? "selected" : ""} onClick={() => toggleTeam(team.id)}><span>{team.logo_url ? <img src={team.logo_url} alt="" /> : <Shield size={16}/>}</span><div><strong>{team.name}</strong><small>{team.city || "Team"}</small></div></button>)}</div></div>
+        <div className="tournament-team-picker"><div className="tournament-picker-head"><strong>Select teams</strong><small>{form.team_ids.length} selected</small></div><div className="tournament-team-options">
+          {teams.length === 0 ? (
+            <div className="tournament-team-empty">
+              No registered teams available. Create a team first, then return here.
+            </div>
+          ) : (
+            teams.map(team => (
+              <button
+                type="button"
+                key={team.id}
+                className={form.team_ids.includes(team.id) ? "selected" : ""}
+                onClick={() => toggleTeam(team.id)}
+              >
+                <span>{team.logo_url ? <img src={team.logo_url} alt="" /> : <Shield size={16}/>}</span>
+                <div><strong>{team.name}</strong><small>{team.city || "Team"}</small></div>
+              </button>
+            ))
+          )}
+        </div></div>
         <button className="form-submit" disabled={saving}>{saving ? "Creating tournament…" : "Create tournament"}</button>
       </form>
     </div>}

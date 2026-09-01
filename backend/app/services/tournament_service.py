@@ -33,7 +33,7 @@ class TournamentService:
                     "id": row.team.id,
                     "name": row.team.name,
                     "short_name": row.team.short_name,
-                    "logo_url": row.team.logo_url,
+                    "logo_url": getattr(row.team, "logo_url", None),
                     "city": row.team.city,
                 }
                 for row in tournament.teams
