@@ -139,6 +139,13 @@ export interface AnalyticsOver { over:number; runs:number; }
 export interface AnalyticsWormPoint { ball:number; runs:number; over:number; ball_number:number; }
 export interface AnalyticsBatter { player_id:number; player_name:string; runs:number; balls:number; fours:number; sixes:number; strike_rate:number; }
 export interface AnalyticsInnings { innings_id:number; number:number; batting_team:MatchTeamBrief; runs:number; wickets:number; overs:string; over_series:AnalyticsOver[]; worm:AnalyticsWormPoint[]; batters:AnalyticsBatter[]; }
+export interface MatchAwardPlayer {
+  player_id: number; player_name: string; team_name: string; impact_score: number;
+  batting_score: number; bowling_score: number; fielding_score: number; reason: string;
+}
+export interface MatchAwards { match_id: number; man_of_the_match: MatchAwardPlayer | null; leaderboard: MatchAwardPlayer[]; }
+export interface TournamentAwards { tournament_id: number; man_of_the_series: (MatchAwardPlayer & { matches_played: number; average_impact: number }) | null; leaderboard: (MatchAwardPlayer & { matches_played: number; average_impact: number })[]; }
+
 export interface MatchResultInnings { innings:number; team:MatchTeamBrief; runs:number; wickets:number; overs:string; status:string; }
 export interface MatchResult { match_id:number; status:MatchStatus; completed_at:string|null; result_type:string; result_text:string; winner:MatchTeamBrief|null; margin:number|null; target:number|null; runs_required:number|null; balls_remaining:number|null; required_run_rate:number|null; target_team:MatchTeamBrief|null; innings:MatchResultInnings[]; }
 
@@ -179,6 +186,7 @@ export interface TournamentCreate {
 export const tournamentsApi = {
   list: (q = "") => request<Tournament[]>(`/tournaments${q ? `?q=${encodeURIComponent(q)}` : ""}`),
   get: (id: number) => request<Tournament>(`/tournaments/${id}`),
+  awards: (id: number) => request<TournamentAwards>(`/tournaments/${id}/awards`),
   create: (data: TournamentCreate) => request<Tournament>("/tournaments", { method: "POST", body: JSON.stringify(data) }),
   delete: (id: number) => request<void>(`/tournaments/${id}`, { method: "DELETE" }),
 };
@@ -196,6 +204,7 @@ export const matchesApi = {
   innings:(id:number)=>request<Innings[]>(`/matches/${id}/innings`),
   scorecard:(id:number)=>request<MatchScorecard>(`/matches/${id}/scorecard`),
   result:(id:number)=>request<MatchResult>(`/matches/${id}/result`),
+  awards:(id:number)=>request<MatchAwards>(`/matches/${id}/awards`),
   delete:(id:number)=>request<void>(`/matches/${id}`,{method:"DELETE"}),
   updateState:(matchId:number,inningsId:number,data:{striker_id:number;non_striker_id:number;bowler_id:number})=>request<Innings>(`/matches/${matchId}/innings/${inningsId}/state`,{method:"PATCH",body:JSON.stringify(data)}),
   startInnings:(id:number,data:{batting_team_id:number;striker_id:number;non_striker_id:number;bowler_id:number})=>request<Innings>(`/matches/${id}/innings/start`,{method:"POST",body:JSON.stringify(data)}),

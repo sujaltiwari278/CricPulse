@@ -65,12 +65,14 @@ export default function MatchScorer() {
 
   const [innings, setInnings] = useState<Innings[]>([]);
   const [matchResult, setMatchResult] = useState<Awaited<ReturnType<typeof matchesApi.result>> | null>(null);
+  const [matchAward, setMatchAward] = useState<Awaited<ReturnType<typeof matchesApi.awards>> | null>(null);
 
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
   // Toss
   const [call, setCall] = useState<"HEADS" | "TAILS">("HEADS");
+  const [tossCallerTeam, setTossCallerTeam] = useState<number | null>(null);
   const [tossText, setTossText] = useState("");
   const [flipping, setFlipping] = useState(false);
 
@@ -130,14 +132,21 @@ export default function MatchScorer() {
 
     setInnings(loadedInnings);
 
-    if (loadedMatch.status === "COMPLETED" && loadedMatch.format !== "TEST") {
+    if (loadedMatch.status === "COMPLETED") {
       try {
-        setMatchResult(await matchesApi.result(matchId));
+        const [result, award] = await Promise.all([
+          matchesApi.result(matchId),
+          matchesApi.awards(matchId),
+        ]);
+        setMatchResult(result);
+        setMatchAward(award);
       } catch {
         setMatchResult(null);
+        setMatchAward(null);
       }
     } else {
       setMatchResult(null);
+      setMatchAward(null);
     }
 
     // If an innings is already live, restore its player state.
@@ -310,7 +319,7 @@ export default function MatchScorer() {
       setFlipping(true);
       setError("");
       await new Promise((resolve) => window.setTimeout(resolve, 1200));
-      const result = await matchesApi.toss(matchId, teamAId, call);
+      const result = await matchesApi.toss(matchId, tossCallerTeam ?? teamAId, call);
       setMatch(result.match);
       setTossText(`${result.winner_team_name} won the toss · ${result.result}`);
     } catch (err) {
@@ -594,8 +603,12 @@ export default function MatchScorer() {
   match.format !== "TEST"
 ) {
         try {
-          const finalResult = await matchesApi.result(matchId);
+          const [finalResult, finalAward] = await Promise.all([
+            matchesApi.result(matchId),
+            matchesApi.awards(matchId),
+          ]);
           setMatchResult(finalResult);
+          setMatchAward(finalAward);
           setMatch((existing) => existing ? { ...existing, status: "COMPLETED" } : existing);
         } catch {
           // Final score is already persisted; result display can refresh on reload.
@@ -829,7 +842,7 @@ export default function MatchScorer() {
 
   return (
     <main className="scorer-shell cp-live-scorer">
-      <style>{`        .cp-live-scorer{min-height:100vh;background:radial-gradient(circle at 88% 8%,rgba(27,156,101,.2),transparent 30%),radial-gradient(circle at 8% 90%,rgba(216,167,70,.1),transparent 26%),#0b1119;padding:28px 18px 56px;}        .cp-live-scorer .scorer-live-grid{gap:20px;align-items:start;}        .cp-live-scorer .scorer-live-grid > div,.cp-live-scorer .scorer-live-grid > section{border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 45px rgba(0,0,0,.2);}        .cp-live-scorer .run-pad button{min-height:60px;border:1px solid rgba(255,255,255,.06);box-shadow:0 8px 18px rgba(0,0,0,.16);transition:transform .14s ease,background .14s ease;}        .cp-live-scorer .run-pad button:hover:not(:disabled){transform:translateY(-2px);background:#138a5b;}        .cp-live-scorer .quick-extra-grid button{min-height:42px;}        .cp-result-card{margin-top:20px;border-radius:28px;padding:32px 24px;text-align:center;background:linear-gradient(135deg,#0b1320,#174430);color:#fff;border:1px solid rgba(89,225,173,.2);box-shadow:0 24px 55px rgba(0,0,0,.22);}        .cp-result-kicker{font-size:11px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#63e6ad;}        .cp-result-icon{width:58px;height:58px;margin:14px auto;border-radius:18px;display:grid;place-items:center;background:rgba(216,167,70,.15);color:#e2b75a;}        .cp-result-label{margin:0;color:#aebbc3;font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;}        .cp-result-winner{margin:7px 0 4px;font-size:38px;line-height:1.05;font-weight:950;letter-spacing:-.04em;}        .cp-result-text{margin:0;color:#dbe5e9;font-size:14px;}        .cp-result-score-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px;text-align:left;}        .cp-result-score{padding:14px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);}        .cp-result-score span{display:block;color:#8fa0aa;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;}        .cp-result-score strong{display:block;margin-top:5px;font-size:15px;color:#fff;}        @media(max-width:700px){.cp-live-scorer{padding:18px 12px 40px}.cp-result-score-grid{grid-template-columns:1fr}.cp-result-winner{font-size:30px}}      `}</style>
+      <style>{`        .cp-live-scorer{min-height:100vh;background:radial-gradient(circle at 88% 8%,rgba(27,156,101,.2),transparent 30%),radial-gradient(circle at 8% 90%,rgba(216,167,70,.1),transparent 26%),#0b1119;padding:28px 18px 56px;}        .cp-live-scorer .scorer-live-grid{gap:20px;align-items:start;}        .cp-live-scorer .scorer-live-grid > div,.cp-live-scorer .scorer-live-grid > section{border:1px solid rgba(255,255,255,.08);box-shadow:0 20px 45px rgba(0,0,0,.2);}        .cp-live-scorer .run-pad button{min-height:60px;border:1px solid rgba(255,255,255,.06);box-shadow:0 8px 18px rgba(0,0,0,.16);transition:transform .14s ease,background .14s ease;}        .cp-live-scorer .run-pad button:hover:not(:disabled){transform:translateY(-2px);background:#138a5b;}        .cp-live-scorer .quick-extra-grid button{min-height:42px;}        .cp-result-card{margin-top:20px;border-radius:28px;padding:32px 24px;text-align:center;background:linear-gradient(135deg,#0b1320,#174430);color:#fff;border:1px solid rgba(89,225,173,.2);box-shadow:0 24px 55px rgba(0,0,0,.22);}        .cp-result-kicker{font-size:11px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#63e6ad;}        .cp-result-icon{width:58px;height:58px;margin:14px auto;border-radius:18px;display:grid;place-items:center;background:rgba(216,167,70,.15);color:#e2b75a;}        .cp-result-label{margin:0;color:#aebbc3;font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;}        .cp-result-winner{margin:7px 0 4px;font-size:38px;line-height:1.05;font-weight:950;letter-spacing:-.04em;}        .cp-result-text{margin:0;color:#dbe5e9;font-size:14px;}        .cp-award-card{margin:18px auto 0;max-width:520px;padding:14px 16px;border-radius:18px;background:rgba(216,167,70,.12);border:1px solid rgba(216,167,70,.26);text-align:center}.cp-award-card span{display:block;color:#e2b75a;font-size:10px;font-weight:900;letter-spacing:.18em}.cp-award-card strong{display:block;margin-top:5px;font-size:22px}.cp-award-card small{display:block;margin-top:4px;color:#b9c7cc;font-size:12px}        .cp-result-score-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px;text-align:left;}        .cp-result-score{padding:14px;border-radius:16px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.08);}        .cp-result-score span{display:block;color:#8fa0aa;font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase;}        .cp-result-score strong{display:block;margin-top:5px;font-size:15px;color:#fff;}        @media(max-width:700px){.cp-live-scorer{padding:18px 12px 40px}.cp-result-score-grid{grid-template-columns:1fr}.cp-result-winner{font-size:30px}}      `}</style>
       <div className="mx-auto max-w-7xl">
 
         <Link
@@ -884,8 +897,7 @@ export default function MatchScorer() {
 
         {/* PRE MATCH */}
         {match.status !== "LIVE" &&
-          match.status !== "INNINGS_BREAK" &&
-          match.status !== "COMPLETED" && (
+          match.status !== "INNINGS_BREAK" && (
             <section className="mt-5 grid gap-5 lg:grid-cols-2">
 
               {/* PLAYING XI */}
@@ -991,8 +1003,19 @@ export default function MatchScorer() {
                 {match.status === "CREATED" && (
                   <>
                     <p className="mt-2 text-sm text-slate-500">
-                      {match.team_a.name} will call the toss. Choose a side, then flip.
+                      Choose which team calls the toss, choose heads or tails, then flip.
                     </p>
+                    <div className="mt-4">
+                      <p className="mb-2 text-xs font-black uppercase tracking-widest text-slate-400">Toss caller</p>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[match.team_a, match.team_b].map((team) => (
+                          <button type="button" key={team.id} onClick={() => setTossCallerTeam(team.id)} className={`rounded-xl border-2 p-3 text-left font-black transition ${(tossCallerTeam ?? teamAId) === team.id ? "border-emerald-500 bg-emerald-50 text-emerald-900" : "border-slate-200 bg-white hover:border-emerald-300"}`}>
+                            {team.name}
+                            <span className="mt-1 block text-xs font-bold text-slate-400">Will call the coin</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
                     <div className={`toss-coin ${flipping ? "is-flipping" : ""}`}>
                       <span>{flipping ? "" : match.toss_result === "HEADS" ? "H" : match.toss_result === "TAILS" ? "T" : call === "HEADS" ? "H" : "T"}</span>
                     </div>
@@ -1100,7 +1123,14 @@ export default function MatchScorer() {
             <div className="cp-result-icon"><Trophy size={30}/></div>
             <p className="cp-result-label">Winner</p>
             <h2 className="cp-result-winner">{matchResult?.winner?.name || "Match tied"}</h2>
-            <p className="cp-result-text">{matchResult?.result_text || "The second innings is complete."}</p>
+            <p className="cp-result-text">{matchResult?.result_text || "The match is complete."}</p>
+            {matchAward?.man_of_the_match && (
+              <div className="cp-award-card">
+                <span>MAN OF THE MATCH</span>
+                <strong>{matchAward.man_of_the_match.player_name}</strong>
+                <small>{matchAward.man_of_the_match.reason}</small>
+              </div>
+            )}
             {innings.length >= 2 && (
               <div className="cp-result-score-grid">
                 {innings.slice(0,2).map((item)=>(
