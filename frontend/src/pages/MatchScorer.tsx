@@ -884,7 +884,8 @@ export default function MatchScorer() {
 
         {/* PRE MATCH */}
         {match.status !== "LIVE" &&
-          match.status !== "INNINGS_BREAK" && (
+          match.status !== "INNINGS_BREAK" &&
+          match.status !== "COMPLETED" && (
             <section className="mt-5 grid gap-5 lg:grid-cols-2">
 
               {/* PLAYING XI */}
