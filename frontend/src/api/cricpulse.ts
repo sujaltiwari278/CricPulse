@@ -119,7 +119,9 @@ export const teamsApi = {
     request<Team>(`/teams/${id}/members`, { method: "POST", body: JSON.stringify({ player_id }) }),
   removeMember: (id: number, player_id: number) =>
     request<Team>(`/teams/${id}/members/${player_id}`, { method: "DELETE" }),
-};
+
+  delete: (teamId: number) =>
+    request<void>(`/teams/${teamId}`, { method: "DELETE" }),};
 
 export type MatchFormat = "T20" | "ODI" | "CUSTOM" | "TEST";
 export type MatchStatus = "CREATED" | "TOSS_PENDING" | "TOSS_COMPLETED" | "READY" | "LIVE" | "INNINGS_BREAK" | "COMPLETED";

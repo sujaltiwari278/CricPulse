@@ -50,6 +50,17 @@ def update_team(team_id: int, data: TeamUpdate, user: User = Depends(current_use
         raise HTTPException(status_code=409, detail=str(exc))
 
 
+@router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_team(team_id: int, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    try:
+        TeamService.delete(db, user.id, team_id)
+    except PermissionError as exc:
+        raise HTTPException(status_code=403, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+    return None
+
+
 @router.post("/{team_id}/members", response_model=TeamResponse)
 def add_member(team_id: int, data: TeamMemberAdd, user: User = Depends(current_user), db: Session = Depends(get_db)):
     try:

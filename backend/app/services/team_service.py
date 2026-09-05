@@ -36,7 +36,11 @@ class TeamService:
 
     @staticmethod
     def create(db: Session, owner_id: int, data: TeamCreate):
-        existing = db.scalar(select(Team).where(or_(Team.name == data.name, Team.short_name == data.short_name)))
+        existing = db.scalar(
+            select(Team).where(
+                or_(Team.name == data.name, Team.short_name == data.short_name)
+            )
+        )
         if existing:
             raise ValueError("Team name or short name is already in use.")
 
@@ -73,7 +77,13 @@ class TeamService:
         stmt = select(Team).order_by(Team.name.asc())
         if query:
             pattern = f"%{query.strip()}%"
-            stmt = stmt.where(or_(Team.name.ilike(pattern), Team.short_name.ilike(pattern), Team.city.ilike(pattern)))
+            stmt = stmt.where(
+                or_(
+                    Team.name.ilike(pattern),
+                    Team.short_name.ilike(pattern),
+                    Team.city.ilike(pattern),
+                )
+            )
         return [TeamService._response(db, team) for team in db.scalars(stmt).all()]
 
     @staticmethod
@@ -86,20 +96,39 @@ class TeamService:
 
         changes = data.model_dump(exclude_unset=True)
         if "name" in changes:
-            duplicate = db.scalar(select(Team).where(Team.name == changes["name"], Team.id != team_id))
+            duplicate = db.scalar(
+                select(Team).where(Team.name == changes["name"], Team.id != team_id)
+            )
             if duplicate:
                 raise ValueError("Team name is already in use.")
+
         if "short_name" in changes:
             changes["short_name"] = changes["short_name"].upper()
-            duplicate = db.scalar(select(Team).where(Team.short_name == changes["short_name"], Team.id != team_id))
+            duplicate = db.scalar(
+                select(Team).where(
+                    Team.short_name == changes["short_name"], Team.id != team_id
+                )
+            )
             if duplicate:
                 raise ValueError("Team short name is already in use.")
 
         for key, value in changes.items():
             setattr(team, key, value)
+
         db.commit()
         db.refresh(team)
         return TeamService._response(db, team)
+
+    @staticmethod
+    def delete(db: Session, owner_id: int, team_id: int):
+        team = db.get(Team, team_id)
+        if not team:
+            raise ValueError("Team not found.")
+        if team.owner_id != owner_id:
+            raise PermissionError("Only the team creator can delete this team.")
+
+        db.delete(team)
+        db.commit()
 
     @staticmethod
     def add_member(db: Session, owner_id: int, team_id: int, player_id: int):
@@ -110,7 +139,12 @@ class TeamService:
             raise PermissionError("Only the team owner can manage the squad.")
         if len(team.members) >= 11:
             raise ValueError("A team can have at most 11 players.")
-        if db.scalar(select(TeamMember).where(TeamMember.team_id == team_id, TeamMember.player_id == player_id)):
+        if db.scalar(
+            select(TeamMember).where(
+                TeamMember.team_id == team_id,
+                TeamMember.player_id == player_id,
+            )
+        ):
             raise ValueError("Player is already in this team.")
         if not db.get(Player, player_id):
             raise ValueError("Player not found.")
@@ -130,9 +164,15 @@ class TeamService:
         if len(team.members) <= 5:
             raise ValueError("A team must contain at least 5 players.")
 
-        member = db.scalar(select(TeamMember).where(TeamMember.team_id == team_id, TeamMember.player_id == player_id))
+        member = db.scalar(
+            select(TeamMember).where(
+                TeamMember.team_id == team_id,
+                TeamMember.player_id == player_id,
+            )
+        )
         if not member:
             raise ValueError("Player is not in this team.")
+
         db.delete(member)
         db.commit()
         db.refresh(team)
