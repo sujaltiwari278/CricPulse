@@ -48,7 +48,7 @@ export default function PlayerProfile() {
                 {player.location && <span className="tag-with-icon"><MapPin size={12}/>{player.location}</span>}
               </div>
             </div>
-            {isMine && <Link to="/players/me/edit" className="profile-edit-button"><Edit3 size={16}/>Edit profile</Link>}
+            {isMine && <Link to="/players/me/edit" className="profile-edit-button">Edit profile</Link>}
           </div>
 
           <div className="player-profile-hero-stats">
