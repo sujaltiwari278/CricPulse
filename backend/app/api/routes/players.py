@@ -35,7 +35,7 @@ def update_my_player(data: PlayerUpdate, user: User = Depends(current_user), db:
         raise HTTPException(status_code=404, detail=str(exc))
 
 
-@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/me", status_code=status.HTTP_204_NO_CONTENT, operation_id="delete_my_player_profile")
 def delete_my_player(user: User = Depends(current_user), db: Session = Depends(get_db)):
     try:
         PlayerService.delete(db, user.id)

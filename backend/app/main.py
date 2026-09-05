@@ -20,11 +20,7 @@ try:
     inspector = inspect(engine)
     with engine.begin() as conn:
         for table, columns in {
-            "player_profiles": {
-                "photo_url": "TEXT",
-                "country": "VARCHAR(100)",
-                "is_deleted": "BOOLEAN NOT NULL DEFAULT FALSE",
-            },
+            "player_profiles": {"photo_url": "TEXT", "country": "VARCHAR(100)", "is_deleted": "BOOLEAN NOT NULL DEFAULT FALSE"},
             "teams": {"logo_url": "TEXT", "country": "VARCHAR(100)"},
             "matches": {"toss_result": "VARCHAR(10)"},
         }.items():
