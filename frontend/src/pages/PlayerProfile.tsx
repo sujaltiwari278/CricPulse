@@ -1,4 +1,4 @@
-import { ArrowLeft, Edit3, MapPin, Trophy, CircleDot, ShieldCheck, Target, Crosshair } from "lucide-react";
+import { ArrowLeft, MapPin, Trophy, CircleDot, ShieldCheck, Target, Crosshair } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 import { useEffect, useState, type ReactNode } from "react";
 import { playersApi, type Player, type PlayerStats } from "../api/cricpulse";
