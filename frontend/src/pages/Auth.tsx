@@ -76,12 +76,17 @@ export default function Auth() {
       }
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        setError(
-          error.response?.data?.detail ||
-            "Something went wrong."
-        );
+        if (error.code === "ECONNABORTED") {
+          setError("The CricPulse server is still waking up. Please try again in a moment.");
+        } else if (!error.response) {
+          setError("We could not reach CricPulse. Check your connection and try again.");
+        } else {
+          setError(error.response.data?.detail || "We could not sign you in. Please try again.");
+        }
+      } else if (error instanceof Error) {
+        setError(error.message);
       } else {
-        setError("Something went wrong.");
+        setError("We could not sign you in. Please try again.");
       }
     } finally {
       setSubmitting(false);
@@ -238,7 +243,7 @@ export default function Auth() {
             disabled={submitting}
           >
             {submitting
-              ? "Please wait..."
+              ? "Connecting to CricPulse..."
               : mode === "login"
               ? "Sign in"
               : "Create account"}

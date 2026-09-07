@@ -1,5 +1,5 @@
-const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
-const API_BASE = configuredApiUrl ? `${configuredApiUrl}/api` : "/api";
+const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "https://cricpulse-cjmr.onrender.com";
+const API_BASE = `${configuredApiUrl}/api`;
 
 function getAccessToken(): string | null {
   return localStorage.getItem("cricpulse_token");

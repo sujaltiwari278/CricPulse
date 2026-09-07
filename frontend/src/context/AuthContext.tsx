@@ -91,7 +91,10 @@ export function AuthProvider({
       {
         identifier,
         password,
-      }
+      },
+      // Render can need time to wake after an idle period. This longer timeout
+      // applies only to an intentional sign-in, not initial app rendering.
+      { timeout: 35000 },
     );
 
     const token = response.data.access_token;
@@ -106,10 +109,13 @@ export function AuthProvider({
       token
     );
 
-    // Now get current user
-    const me = await api.get<User>("/auth/me");
-
-    setUser(me.data);
+    // Login already returns the authenticated user. Avoid a second round trip,
+    // which was causing the first sign-in to intermittently fail on a cold API.
+    if (!response.data.user || typeof response.data.user.id !== "number") {
+      localStorage.removeItem("cricpulse_token");
+      throw new Error("The sign-in response was incomplete. Please try again.");
+    }
+    setUser(response.data.user);
   }
 
   // ---------------------------------------

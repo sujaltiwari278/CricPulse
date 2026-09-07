@@ -1,10 +1,9 @@
 import axios from "axios";
 
-// A missing VITE_API_URL used to produce requests such as `undefined/api/auth/me`.
-// On Vercel those requests are rewritten to the SPA and can leave a restored session
-// waiting for an API response that will never be valid.
-const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
-const API_BASE_URL = configuredApiUrl ? `${configuredApiUrl}/api` : "/api";
+// Vercel does not receive local .env values automatically. Keep the production
+// API as a fallback while still allowing every deployment to override it.
+const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "") || "https://cricpulse-cjmr.onrender.com";
+const API_BASE_URL = `${configuredApiUrl}/api`;
 
 const api = axios.create({
   baseURL: API_BASE_URL,
