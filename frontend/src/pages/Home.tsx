@@ -18,8 +18,14 @@ export default function Home() {
 
   useEffect(() => {
     let mounted = true;
+    let timer: number | undefined;
+    let refreshing = false;
 
     async function load() {
+      // Avoid overlapping polls when an API response is slow. This prevents a
+      // handful of open dashboards from multiplying backend work.
+      if (refreshing || document.visibilityState === "hidden") return;
+      refreshing = true;
       try {
         const items = await matchesApi.list();
         if (!mounted) return;
@@ -41,14 +47,25 @@ export default function Home() {
         if (mounted) setMatches([]);
       } finally {
         if (mounted) setLoading(false);
+        refreshing = false;
+        if (mounted && document.visibilityState === "visible") {
+          timer = window.setTimeout(load, 15000);
+        }
       }
     }
 
+    function handleVisibilityChange() {
+      if (document.visibilityState !== "visible") return;
+      if (timer) window.clearTimeout(timer);
+      load();
+    }
+
     load();
-    const timer = window.setInterval(load, 8000);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
     return () => {
       mounted = false;
-      window.clearInterval(timer);
+      if (timer) window.clearTimeout(timer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
 

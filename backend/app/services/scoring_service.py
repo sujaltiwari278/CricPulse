@@ -12,12 +12,14 @@ class ScoringService:
     def _innings(
         db: Session,
         innings_id: int,
+        lock_for_update: bool = False,
     ) -> Innings | None:
-        return db.scalar(
-            select(Innings).where(
-                Innings.id == innings_id
-            )
-        )
+        statement = select(Innings).where(Innings.id == innings_id)
+        if lock_for_update:
+            # Serialise scorer mutations. Without this, two tabs can both use
+            # the same ball number and overwrite the innings totals.
+            statement = statement.with_for_update()
+        return db.scalar(statement)
 
     @staticmethod
     def _xi_ids(
@@ -160,6 +162,14 @@ class ScoringService:
         match: Match,
         data: InningsStartRequest,
     ):
+
+        # Only one innings can be started for a match at a time, even when the
+        # scorer is open in multiple browser tabs.
+        match = db.scalar(
+            select(Match).where(Match.id == match.id).with_for_update()
+        )
+        if not match:
+            raise ValueError("Match not found.")
 
         # Match must already have been started.
         if match.status not in {
@@ -367,6 +377,7 @@ class ScoringService:
         innings = cls._innings(
             db,
             innings_id,
+            lock_for_update=True,
         )
 
         if not innings:
@@ -469,6 +480,7 @@ class ScoringService:
         innings = cls._innings(
             db,
             innings_id,
+            lock_for_update=True,
         )
 
         if not innings:

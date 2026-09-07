@@ -13,6 +13,12 @@ class Settings(BaseSettings):
 
     FRONTEND_URL: str = "http://localhost:5173"
 
+    # Supports a small concurrent workload without exceeding the managed
+    # PostgreSQL connection limit.
+    DB_POOL_SIZE: int = 5
+    DB_MAX_OVERFLOW: int = 5
+    DB_POOL_TIMEOUT: int = 15
+
     model_config = SettingsConfigDict(
         env_file=".env",
         case_sensitive=True,
