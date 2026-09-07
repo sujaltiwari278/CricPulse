@@ -1,5 +1,6 @@
 import { CalendarDays, Plus, Search, Shield, Trophy, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import type { FormEvent } from "react";
 import { teamsApi, tournamentsApi, type MatchFormat, type Team, type Tournament } from "../api/cricpulse";
 import { useAuth } from "../context/AuthContext";
@@ -98,7 +99,7 @@ export default function Tournaments() {
         <h3>{t.name}</h3>
         <p className="tournament-meta">{t.location || "Location not set"} · {t.teams.length} teams</p>
         <div className="tournament-team-row">{t.teams.slice(0, 6).map(team => <div className="tournament-team-chip" key={team.id}><span>{team.logo_url ? <img src={team.logo_url} alt="" /> : <Shield size={15}/>}</span>{team.short_name}</div>)}</div>
-        <div className="tournament-card-footer"><span><CalendarDays size={14}/>{t.start_date || "Date TBA"}</span><span>View tournament →</span></div>
+        <div className="tournament-card-footer"><span><CalendarDays size={14}/>{t.start_date || "Date TBA"}</span><Link to={`/tournaments/${t.id}`}>View tournament →</Link></div>
       </article>)}</section>}
     </div>
 

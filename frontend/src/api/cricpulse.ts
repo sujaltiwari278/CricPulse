@@ -1,4 +1,5 @@
-const API_BASE = `${import.meta.env.VITE_API_URL}/api`;
+const configuredApiUrl = import.meta.env.VITE_API_URL?.replace(/\/$/, "");
+const API_BASE = configuredApiUrl ? `${configuredApiUrl}/api` : "/api";
 
 function getAccessToken(): string | null {
   return localStorage.getItem("cricpulse_token");
@@ -11,7 +12,19 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (!headers.has("Content-Type") && options.body) headers.set("Content-Type", "application/json");
   if (token) headers.set("Authorization", `Bearer ${token}`);
 
-  const response = await fetch(`${API_BASE}${path}`, { ...options, headers });
+  const controller = new AbortController();
+  const timeout = window.setTimeout(() => controller.abort(), 8000);
+  let response: Response;
+  try {
+    response = await fetch(`${API_BASE}${path}`, { ...options, headers, signal: controller.signal });
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new Error("The CricPulse service did not respond. Please try again.");
+    }
+    throw error;
+  } finally {
+    window.clearTimeout(timeout);
+  }
   const body = await response.json().catch(() => null);
 
   if (!response.ok) {

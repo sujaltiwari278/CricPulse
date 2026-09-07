@@ -51,8 +51,6 @@ export function AuthProvider({
   async function loadUser() {
     const token = localStorage.getItem("cricpulse_token");
 
-    console.log("Stored token:", token);
-
     if (!token) {
       setUser(null);
       setLoading(false);
@@ -62,12 +60,13 @@ export function AuthProvider({
     try {
       const response = await api.get<User>("/auth/me");
 
-      console.log("Current user:", response.data);
-
+      // A fallback HTML page can still be returned with HTTP 200. It is not a
+      // valid session and must not keep the protected application mounted.
+      if (!response.data || typeof response.data.id !== "number") {
+        throw new Error("Invalid authentication response");
+      }
       setUser(response.data);
     } catch (error) {
-      console.error("Failed to load user:", error);
-
       localStorage.removeItem("cricpulse_token");
       setUser(null);
     } finally {
@@ -95,8 +94,6 @@ export function AuthProvider({
       }
     );
 
-    console.log("LOGIN RESPONSE:", response.data);
-
     const token = response.data.access_token;
 
     if (!token) {
@@ -107,11 +104,6 @@ export function AuthProvider({
     localStorage.setItem(
       "cricpulse_token",
       token
-    );
-
-    console.log(
-      "Token stored:",
-      localStorage.getItem("cricpulse_token")
     );
 
     // Now get current user
