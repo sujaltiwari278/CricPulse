@@ -33,6 +33,8 @@ class TeamService:
             "logo_url": team.logo_url,
             "country": team.country,
             "owner_id": team.owner_id,
+            "captain_id": team.captain_id,
+            "captain": next((cls._member_response(db, m) for m in team.members if m.player_id == team.captain_id), None),
             "members": [cls._member_response(db, member) for member in team.members],
         }
 
@@ -97,6 +99,10 @@ class TeamService:
             raise PermissionError("Only the team owner can edit this team.")
 
         changes = data.model_dump(exclude_unset=True)
+        if "captain_id" in changes:
+            captain_id = changes["captain_id"]
+            if captain_id is not None and not any(m.player_id == captain_id for m in team.members):
+                raise ValueError("Captain must be a player in the team squad.")
         if "name" in changes:
             duplicate = db.scalar(
                 select(Team).where(Team.name == changes["name"], Team.id != team_id)
@@ -194,6 +200,8 @@ class TeamService:
         if not member:
             raise ValueError("Player is not in this team.")
 
+        if team.captain_id == player_id:
+            team.captain_id = None
         db.delete(member)
         db.commit()
         db.refresh(team)

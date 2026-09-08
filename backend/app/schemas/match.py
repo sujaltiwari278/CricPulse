@@ -56,7 +56,12 @@ class MatchResponse(BaseModel):
     id: int; creator_id: int; team_a: TeamBrief; team_b: TeamBrief; format: MatchFormat
     overs: int | None; test_days: int | None; overs_per_day: int | None; venue: str | None; location: str | None
     latitude: float | None; longitude: float | None; description: str | None; status: MatchStatus
+    man_of_match_id: int | None
+    man_of_match: PlayerBrief | None
     toss_winner_id: int | None; toss_result: Literal["HEADS", "TAILS"] | None = None; toss_decision: TossDecision | None; started_at: datetime | None; completed_at: datetime | None; created_at: datetime
+
+class ManOfMatchRequest(BaseModel):
+    player_id: int
 
 class MatchPlayerIds(BaseModel):
     team_a_player_ids: list[int] = Field(min_length=5, max_length=11)

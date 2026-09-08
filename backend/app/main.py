@@ -21,8 +21,8 @@ try:
     with engine.begin() as conn:
         for table, columns in {
             "player_profiles": {"photo_url": "TEXT", "country": "VARCHAR(100)", "is_deleted": "BOOLEAN NOT NULL DEFAULT FALSE"},
-            "teams": {"logo_url": "TEXT", "country": "VARCHAR(100)"},
-            "matches": {"toss_result": "VARCHAR(10)"},
+            "teams": {"logo_url": "TEXT", "country": "VARCHAR(100)", "captain_id": "INTEGER"},
+            "matches": {"toss_result": "VARCHAR(10)", "man_of_match_id": "INTEGER"},
         }.items():
             existing = {c["name"] for c in inspector.get_columns(table)}
             for column, sql_type in columns.items():

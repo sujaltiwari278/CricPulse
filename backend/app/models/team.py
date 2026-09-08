@@ -15,9 +15,11 @@ class Team(Base):
     logo_url: Mapped[str | None] = mapped_column(Text)
     country: Mapped[str | None] = mapped_column(String(100))
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    captain_id: Mapped[int | None] = mapped_column(ForeignKey("player_profiles.id", ondelete="SET NULL"))
 
     owner = relationship("User")
     members = relationship("TeamMember", back_populates="team", cascade="all, delete-orphan")
+    captain = relationship("Player", foreign_keys=[captain_id])
 
 
 class TeamMember(Base):

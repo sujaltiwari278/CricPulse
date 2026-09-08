@@ -33,12 +33,14 @@ class Match(Base):
     toss_decision: Mapped[str | None] = mapped_column(String(10))
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    man_of_match_id: Mapped[int | None] = mapped_column(ForeignKey("player_profiles.id", ondelete="SET NULL"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, default=datetime.utcnow)
 
     creator = relationship("User", foreign_keys=[creator_id])
     team_a = relationship("Team", foreign_keys=[team_a_id])
     team_b = relationship("Team", foreign_keys=[team_b_id])
     toss_winner = relationship("Team", foreign_keys=[toss_winner_id])
+    man_of_match = relationship("Player", foreign_keys=[man_of_match_id])
     playing_xi = relationship("MatchPlayer", back_populates="match", cascade="all, delete-orphan")
     innings = relationship("Innings", back_populates="match", cascade="all, delete-orphan", order_by="Innings.number")
 

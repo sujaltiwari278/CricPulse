@@ -7,7 +7,7 @@ from app.core.database import get_db
 from app.models.match import Innings, Match, MatchPlayer
 from app.models.user import User
 from app.schemas.match import (DeliveryCreate, InningsResponse, InningsStartRequest, InningsStateUpdate, MatchCreate, MatchPlayerIds,
-                               MatchResponse, MatchSetupResponse, MatchUpdate, TossRequest, TossResponse)
+                               MatchResponse, MatchSetupResponse, MatchUpdate, TossRequest, TossResponse, ManOfMatchRequest)
 from app.services.match_service import MatchService
 from app.services.scoring_service import ScoringService
 from app.services.analytics_service import AnalyticsService
@@ -85,6 +85,32 @@ def start_innings(match_id: int, data: InningsStartRequest, user: User = Depends
         if match.creator_id != user.id: raise PermissionError("Only the match creator can operate the scorer.")
         return ScoringService.start_innings(db, match, data)
     except (PermissionError, ValueError) as exc: fail(exc)
+
+
+@router.put("/{match_id}/man-of-the-match", response_model=MatchResponse)
+def set_man_of_match(match_id: int, data: ManOfMatchRequest, user: User = Depends(current_user), db: Session = Depends(get_db)):
+    match = db.get(Match, match_id)
+    if not match:
+        raise HTTPException(status_code=404, detail="Match not found.")
+    if match.creator_id != user.id:
+        raise HTTPException(status_code=403, detail="Only the match creator can select Man of the Match.")
+    if match.status != "COMPLETED":
+        raise HTTPException(status_code=409, detail="Man of the Match can only be selected after the match is completed.")
+    result = ResultService.summary(db, match_id)
+    winner = result.get("winner")
+    if not winner:
+        raise HTTPException(status_code=409, detail="A Man of the Match is not available for a tied/no-result match.")
+    from app.models.player import Player
+    player = db.get(Player, data.player_id)
+    if not player:
+        raise HTTPException(status_code=404, detail="Player not found.")
+    is_winner_player = db.scalar(select(MatchPlayer.id).where(MatchPlayer.match_id == match_id, MatchPlayer.team_id == winner["id"], MatchPlayer.player_id == data.player_id))
+    if not is_winner_player:
+        raise HTTPException(status_code=400, detail="Man of the Match must be a player from the winning team.")
+    match.man_of_match_id = player.id
+    db.commit()
+    db.refresh(match)
+    return MatchService.response(match)
 
 @router.get("/{match_id}/scorecard")
 def match_scorecard(match_id: int, db: Session = Depends(get_db)):

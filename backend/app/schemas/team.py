@@ -9,6 +9,7 @@ class TeamCreate(BaseModel):
     logo_url: str | None = Field(None, max_length=2_000_000)
     country: str | None = Field(None, max_length=100)
     player_ids: list[int] = Field(min_length=5, max_length=11)
+    captain_id: int | None = None
 
     @field_validator("player_ids")
     @classmethod
@@ -25,6 +26,7 @@ class TeamUpdate(BaseModel):
     description: str | None = Field(None, max_length=1000)
     logo_url: str | None = Field(None, max_length=2_000_000)
     country: str | None = Field(None, max_length=100)
+    captain_id: int | None = None
 
 
 class TeamMemberAdd(BaseModel):
@@ -49,6 +51,8 @@ class TeamResponse(BaseModel):
     logo_url: str | None
     country: str | None
     owner_id: int
+    captain_id: int | None
+    captain: TeamMemberResponse | None
     members: list[TeamMemberResponse]
 
     model_config = ConfigDict(from_attributes=True)

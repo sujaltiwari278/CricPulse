@@ -37,6 +37,8 @@ class MatchService:
             "toss_decision": match.toss_decision,
             "started_at": match.started_at,
             "completed_at": match.completed_at,
+            "man_of_match_id": match.man_of_match_id,
+            "man_of_match": {"id": match.man_of_match.id, "username": match.man_of_match.user.username if match.man_of_match.user else "", "display_name": match.man_of_match.display_name, "role": match.man_of_match.role} if match.man_of_match else None,
             "created_at": match.created_at,
         }
 

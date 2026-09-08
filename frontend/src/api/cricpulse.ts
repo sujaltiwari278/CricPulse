@@ -93,6 +93,8 @@ export interface Team {
   logo_url: string | null;
   country: string | null;
   owner_id: number;
+  captain_id: number | null;
+  captain: TeamMember | null;
   members: TeamMember[];
 }
 
@@ -126,7 +128,7 @@ export const teamsApi = {
   stats: (id: number) => request<TeamStats>(`/teams/${id}/stats`),
   create: (data: { name: string; short_name: string; city?: string; description?: string; logo_url?: string | null; country?: string | null; player_ids: number[] }) =>
     request<Team>("/teams", { method: "POST", body: JSON.stringify(data) }),
-  update: (id: number, data: Partial<Pick<Team, "name" | "short_name" | "city" | "description" | "logo_url" | "country">>) =>
+  update: (id: number, data: Partial<Pick<Team, "name" | "short_name" | "city" | "description" | "logo_url" | "country" | "captain_id">>) =>
     request<Team>(`/teams/${id}`, { method: "PUT", body: JSON.stringify(data) }),
   addMember: (id: number, player_id: number) =>
     request<Team>(`/teams/${id}/members`, { method: "POST", body: JSON.stringify({ player_id }) }),
@@ -139,7 +141,7 @@ export const teamsApi = {
 export type MatchFormat = "T20" | "ODI" | "CUSTOM" | "TEST";
 export type MatchStatus = "CREATED" | "TOSS_PENDING" | "TOSS_COMPLETED" | "READY" | "LIVE" | "INNINGS_BREAK" | "COMPLETED";
 export interface MatchTeamBrief { id:number; name:string; short_name:string; city:string|null; }
-export interface Match { id:number; creator_id:number; team_a:MatchTeamBrief; team_b:MatchTeamBrief; format:MatchFormat; overs:number|null; test_days:number|null; overs_per_day:number|null; venue:string|null; location:string|null; latitude:number|null; longitude:number|null; description:string|null; status:MatchStatus; toss_winner_id:number|null; toss_result:"HEADS"|"TAILS"|null; toss_decision:"BAT"|"BOWL"|null; started_at:string|null; completed_at:string|null; created_at:string; }
+export interface Match { id:number; creator_id:number; team_a:MatchTeamBrief; team_b:MatchTeamBrief; format:MatchFormat; overs:number|null; test_days:number|null; overs_per_day:number|null; venue:string|null; location:string|null; latitude:number|null; longitude:number|null; description:string|null; status:MatchStatus; toss_winner_id:number|null; toss_result:"HEADS"|"TAILS"|null; toss_decision:"BAT"|"BOWL"|null; started_at:string|null; completed_at:string|null; man_of_match_id:number|null; man_of_match:PlayerBrief|null; created_at:string; }
 export interface PlayerBrief { id:number; username:string; display_name:string; role:string|null; }
 export interface PlayingXI { team_id:number; team_name:string; players:PlayerBrief[]; }
 export interface MatchSetup { match:Match; playing_xi:PlayingXI[]; }
@@ -211,6 +213,7 @@ export const matchesApi = {
   innings:(id:number)=>request<Innings[]>(`/matches/${id}/innings`),
   scorecard:(id:number)=>request<MatchScorecard>(`/matches/${id}/scorecard`),
   result:(id:number)=>request<MatchResult>(`/matches/${id}/result`),
+  setManOfMatch:(id:number,player_id:number)=>request<Match>(`/matches/${id}/man-of-the-match`,{method:"PUT",body:JSON.stringify({player_id})}),
   delete:(id:number)=>request<void>(`/matches/${id}`,{method:"DELETE"}),
   updateState:(matchId:number,inningsId:number,data:{striker_id:number;non_striker_id:number;bowler_id:number})=>request<Innings>(`/matches/${matchId}/innings/${inningsId}/state`,{method:"PATCH",body:JSON.stringify(data)}),
   startInnings:(id:number,data:{batting_team_id:number;striker_id:number;non_striker_id:number;bowler_id:number})=>request<Innings>(`/matches/${id}/innings/start`,{method:"POST",body:JSON.stringify(data)}),
