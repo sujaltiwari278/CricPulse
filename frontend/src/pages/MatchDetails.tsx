@@ -1,7 +1,8 @@
 import { ArrowLeft, MapPin, Play, Shield, Trash2 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { matchesApi, type Match } from "../api/cricpulse";
+import { matchesApi, type Match, type MatchResult } from "../api/cricpulse";
+import Scorecard from "../components/scorecard/Scorecard";
 import { useAuth } from "../context/AuthContext";
 
 export default function MatchDetails() {
@@ -11,12 +12,22 @@ export default function MatchDetails() {
   const [match, setMatch] = useState<Match | null>(null);
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [result, setResult] = useState<MatchResult | null>(null);
 
   useEffect(() => {
     if (id) {
       matchesApi
         .get(+id)
-        .then(setMatch)
+        .then(async (value) => {
+          setMatch(value);
+          if (value.status === "COMPLETED") {
+            try {
+              setResult(await matchesApi.result(+id));
+            } catch {
+              // Keep the scorecard available even if the result summary fails.
+            }
+          }
+        })
         .catch((e) =>
           setError(
             e instanceof Error ? e.message : "Match not found."
@@ -192,6 +203,21 @@ export default function MatchDetails() {
                   </div>
                 </div>
               )}
+
+            {match.status === "COMPLETED" && (
+              <>
+                {result && (
+                  <div className="rounded-3xl border border-emerald-200 bg-emerald-50 p-6">
+                    <p className="text-xs font-black uppercase tracking-widest text-emerald-700">Match result</p>
+                    <h2 className="mt-2 text-2xl font-black text-slate-950">{result.result_text}</h2>
+                    {match.man_of_match && (
+                      <p className="mt-2 text-sm font-bold text-slate-600">🏆 Man of the Match: {match.man_of_match.display_name}</p>
+                    )}
+                  </div>
+                )}
+                <Scorecard matchId={match.id} />
+              </>
+            )}
 
             {match.status === "LIVE" && (
               <div className="rounded-3xl bg-slate-950 p-8 text-center text-white">
