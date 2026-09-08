@@ -7,6 +7,7 @@ import {
   Target,
   TrendingUp,
   Trash2,
+  Pencil,
   X,
 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -111,9 +112,7 @@ export default function TeamDetails() {
               </div>
 
               {owner && (
-                <span className="rounded-full bg-white/10 px-4 py-2 text-sm font-black">
-                  Team owner
-                </span>
+                <div className="flex items-center gap-2"><span className="rounded-full bg-white/10 px-4 py-2 text-sm font-black">Team owner</span><Link to={`/teams/${team.id}/edit`} className="inline-flex items-center gap-2 rounded-xl bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 transition hover:bg-emerald-300"><Pencil size={15} /> Edit team</Link></div>
               )}
             </div>
           </div>

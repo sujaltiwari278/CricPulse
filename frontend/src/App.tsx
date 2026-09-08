@@ -12,6 +12,7 @@ import PlayerProfileEditor from "./pages/PlayerProfileEditor";
 import Teams from "./pages/Teams";
 import CreateTeam from "./pages/CreateTeam";
 import TeamDetails from "./pages/TeamDetails";
+import EditTeam from "./pages/EditTeam";
 import CreateMatch from "./pages/CreateMatch";
 import MatchDetails from "./pages/MatchDetails";
 import EditMatch from "./pages/EditMatch";
@@ -56,6 +57,10 @@ export default function App() {
             <Route
               path="/teams/:id"
               element={<><Navbar /><TeamDetails /></>}
+            />
+            <Route
+              path="/teams/:id/edit"
+              element={<><Navbar /><EditTeam /></>}
             />
 
             <Route

@@ -2,7 +2,9 @@ from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.models.player import Player
+from app.models.match import Match
 from app.models.team import Team, TeamMember
+from app.models.tournament import TournamentTeam
 from app.models.user import User
 from app.schemas.team import TeamCreate, TeamUpdate
 
@@ -127,6 +129,25 @@ class TeamService:
         if team.owner_id != owner_id:
             raise PermissionError("Only the team creator can delete this team.")
 
+        # Existing databases may not have been created with every FK cascade.
+        # Remove dependent match and tournament rows explicitly so deletion is
+        # reliable on both SQLite and PostgreSQL.
+        related_matches = db.scalars(
+            select(Match).where(
+                (Match.team_a_id == team_id) | (Match.team_b_id == team_id)
+            )
+        ).all()
+        for match in related_matches:
+            db.delete(match)
+
+        for registration in db.scalars(
+            select(TournamentTeam).where(TournamentTeam.team_id == team_id)
+        ).all():
+            db.delete(registration)
+
+        # Remove ORM-managed roster rows before deleting the team.
+        team.members.clear()
+        db.flush()
         db.delete(team)
         db.commit()
 

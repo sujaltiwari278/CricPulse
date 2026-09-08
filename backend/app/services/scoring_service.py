@@ -765,8 +765,17 @@ class ScoringService:
             data.dismissed_player_id
         )
 
-        # Runs can cause a change of strike.
-        if total % 2 == 1:
+        # Penalty-only wide/no-ball buttons add one extra without the batters
+        # crossing. For a no-ball with bat runs, only bat runs determine
+        # whether the batters crossed.
+        strike_runs = (
+            data.batter_runs
+            if data.extra_type == "NO_BALL"
+            else 0
+            if data.extra_type == "WIDE"
+            else total
+        )
+        if strike_runs % 2 == 1:
 
             (
                 innings.current_striker_id,

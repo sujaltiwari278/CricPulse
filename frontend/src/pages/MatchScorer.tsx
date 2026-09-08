@@ -604,6 +604,17 @@ export default function MatchScorer() {
         }
       }
 
+      if (updated.status === "COMPLETED" && updated.number === 1) {
+        // The prior bowling side always bats next. Immediately show the
+        // second-innings player picker rather than leaving the scorer in a
+        // stale first-innings state.
+        setMatch((existing) => existing ? { ...existing, status: "INNINGS_BREAK" } : existing);
+        setBattingTeam(String(updated.bowling_team.id));
+        setStriker("");
+        setNonStriker("");
+        setBowler("");
+      }
+
       setStriker(
         String(updated.striker?.id ?? "")
       );
@@ -653,19 +664,18 @@ export default function MatchScorer() {
     resetDelivery();
   }
 
-  async function quickExtra(type: "WIDE" | "NO_BALL", totalRuns: number) {
+  async function quickExtra(type: "WIDE" | "NO_BALL") {
     if (!current) return;
     if (!current.striker || !current.non_striker || !current.bowler) {
       setError("Select striker, non-striker and bowler before scoring.");
       return;
     }
     await sendDelivery({
-      batter_runs: type === "NO_BALL" ? totalRuns - 1 : 0,
+      batter_runs: 0,
       extra_type: type,
-      // A wide's selected number is the complete wide total.
-      // A no-ball always contributes exactly one no-ball extra;
-      // the remainder is recorded as batter runs.
-      extra_runs: type === "WIDE" ? totalRuns : 1,
+      // These are penalty-only shortcuts: exactly one extra, no strike swap.
+      // Multi-run extras remain available in Advanced delivery.
+      extra_runs: 1,
       wicket_type: "NONE",
     });
     resetDelivery();
@@ -1250,22 +1260,16 @@ export default function MatchScorer() {
                     {/* QUICK EXTRAS */}
                     <div className="extra-pad-panel mt-3 rounded-2xl border border-amber-200 bg-amber-50/70 p-3">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="text-sm font-black text-amber-900">Quick extras · total team runs</p>
-                        <span className="text-xs font-bold text-amber-700">1–6 runs</span>
+                        <p className="text-sm font-black text-amber-900">Penalty extras</p>
+                        <span className="text-xs font-bold text-amber-700">No strike change</span>
                       </div>
-                      <div className="quick-extra-grid mt-2 grid grid-cols-6 gap-1.5">
-                        {[1,2,3,4,5,6].map((runs) => (
-                          <button key={`wd-${runs}`} disabled={busy || !current.striker || !current.non_striker || !current.bowler} onClick={() => quickExtra("WIDE", runs)} className="rounded-xl bg-white py-2.5 font-black text-amber-900 shadow-sm ring-1 ring-amber-200 disabled:opacity-40">
-                            {runs}W
-                          </button>
-                        ))}
-                      </div>
-                      <div className="quick-extra-grid mt-2 grid grid-cols-6 gap-1.5">
-                        {[1,2,3,4,5,6,7].map((runs) => (
-                          <button key={`nb-${runs}`} disabled={busy || !current.striker || !current.non_striker || !current.bowler} onClick={() => quickExtra("NO_BALL", runs)} className="rounded-xl bg-slate-950 py-2.5 font-black text-white disabled:opacity-40">
-                            {runs}NB
-                          </button>
-                        ))}
+                      <div className="quick-extra-grid mt-2 grid grid-cols-2 gap-2">
+                        <button disabled={busy || !current.striker || !current.non_striker || !current.bowler} onClick={() => quickExtra("WIDE")} className="rounded-xl bg-white py-3 font-black text-amber-900 shadow-sm ring-1 ring-amber-200 disabled:opacity-40">
+                          Wide +1
+                        </button>
+                        <button disabled={busy || !current.striker || !current.non_striker || !current.bowler} onClick={() => quickExtra("NO_BALL")} className="rounded-xl bg-slate-950 py-3 font-black text-white disabled:opacity-40">
+                          No ball +1
+                        </button>
                       </div>
                     </div>
 
