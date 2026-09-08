@@ -47,12 +47,19 @@ export default function Auth() {
 
     try {
       if (mode === "register") {
-        await api.post("/auth/register", {
-          username,
-          name,
-          email,
-          password,
-        });
+        await api.post(
+          "/auth/register",
+          {
+            username,
+            name,
+            email,
+            password,
+          },
+          // The Render service can take longer than the default client timeout
+          // after an idle period. Account creation needs the same allowance as
+          // sign-in so first-time visitors are not rejected prematurely.
+          { timeout: 60000 },
+        );
 
         /*
          * IMPORTANT:

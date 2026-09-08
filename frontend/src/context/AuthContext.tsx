@@ -94,7 +94,7 @@ export function AuthProvider({
       },
       // Render can need time to wake after an idle period. This longer timeout
       // applies only to an intentional sign-in, not initial app rendering.
-      { timeout: 35000 },
+      { timeout: 60000 },
     );
 
     const token = response.data.access_token;
