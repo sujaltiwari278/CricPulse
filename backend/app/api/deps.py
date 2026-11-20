@@ -1,6 +1,5 @@
 from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy import select
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 from app.core.database import get_db
@@ -15,10 +14,7 @@ def current_user(
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
 ) -> User:
-
-    token = credentials.credentials
-
-    user_id = decode_access_token(token)
+    user_id = decode_access_token(credentials.credentials)
 
     if user_id is None:
         raise HTTPException(
@@ -27,15 +23,19 @@ def current_user(
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    user = db.scalar(
-        select(User).where(User.id == user_id)
-    )
+    user = db.get(User, user_id)
 
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User no longer exists.",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="This account has been deactivated.",
         )
 
     return user

@@ -29,11 +29,7 @@ def register(
     db: Session = Depends(get_db),
 ):
     try:
-        return AuthService.register(
-            db,
-            data,
-        )
-
+        return AuthService.register(db, data)
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
@@ -50,11 +46,12 @@ def login(
     db: Session = Depends(get_db),
 ):
     try:
-        return AuthService.login(
-            db,
-            data,
+        return AuthService.login(db, data)
+    except PermissionError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=str(exc),
         )
-
     except ValueError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

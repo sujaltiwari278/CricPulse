@@ -1,19 +1,29 @@
 from sqlalchemy import or_, select
-from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session, selectinload
 
 from app.models.player import Player
 from app.models.match import Match
 from app.models.team import Team, TeamMember
 from app.models.tournament import TournamentTeam
-from app.models.user import User
 from app.schemas.team import TeamCreate, TeamUpdate
+
+
+def _with_members():
+    """Eager-load members -> player -> user in 3 queries total.
+
+    Previously every member cost an extra query (and every team in the list
+    cost one more), so /teams made hundreds of round-trips to the remote
+    database - slow enough on a cold instance to time out.
+    """
+    return selectinload(Team.members).joinedload(TeamMember.player).joinedload(Player.user)
 
 
 class TeamService:
     @staticmethod
     def _member_response(db: Session, member: TeamMember) -> dict:
         player = member.player
-        user = db.get(User, player.user_id)
+        user = player.user
         return {
             "player_id": player.id,
             "username": user.username,
@@ -40,45 +50,64 @@ class TeamService:
 
     @staticmethod
     def create(db: Session, owner_id: int, data: TeamCreate):
+        name = data.name.strip()
+        short_name = data.short_name.strip().upper()
+
         existing = db.scalar(
             select(Team).where(
-                or_(Team.name == data.name, Team.short_name == data.short_name)
+                or_(Team.name == name, Team.short_name == short_name)
             )
         )
         if existing:
             raise ValueError("Team name or short name is already in use.")
 
-        players = list(db.scalars(select(Player).where(Player.id.in_(data.player_ids))).all())
+        players = list(
+            db.scalars(
+                select(Player).where(
+                    Player.id.in_(data.player_ids),
+                    Player.is_deleted.is_(False),
+                )
+            ).all()
+        )
         if len(players) != len(data.player_ids):
             raise ValueError("One or more selected players do not exist.")
 
+        if data.captain_id is not None and data.captain_id not in data.player_ids:
+            raise ValueError("Captain must be a player in the team squad.")
+
         team = Team(
-            name=data.name.strip(),
-            short_name=data.short_name.strip().upper(),
+            name=name,
+            short_name=short_name,
             city=data.city,
             description=data.description,
             logo_url=data.logo_url,
             country=data.country,
             owner_id=owner_id,
+            captain_id=data.captain_id,
         )
         db.add(team)
-        db.flush()
 
-        for player in players:
-            db.add(TeamMember(team_id=team.id, player_id=player.id))
+        try:
+            db.flush()
+            for player in players:
+                db.add(TeamMember(team_id=team.id, player_id=player.id))
+            db.commit()
+        except IntegrityError:
+            db.rollback()
+            raise ValueError("Team name or short name is already in use.")
 
-        db.commit()
-        db.refresh(team)
-        return TeamService._response(db, team)
+        return TeamService.get(db, team.id)
 
     @staticmethod
     def get(db: Session, team_id: int):
-        team = db.get(Team, team_id)
+        team = db.scalar(
+            select(Team).options(_with_members()).where(Team.id == team_id)
+        )
         return None if not team else TeamService._response(db, team)
 
     @staticmethod
     def list(db: Session, query: str | None = None):
-        stmt = select(Team).order_by(Team.name.asc())
+        stmt = select(Team).options(_with_members()).order_by(Team.name.asc())
         if query:
             pattern = f"%{query.strip()}%"
             stmt = stmt.where(
@@ -124,8 +153,7 @@ class TeamService:
             setattr(team, key, value)
 
         db.commit()
-        db.refresh(team)
-        return TeamService._response(db, team)
+        return TeamService.get(db, team_id)
 
     @staticmethod
     def delete(db: Session, owner_id: int, team_id: int):
@@ -173,13 +201,13 @@ class TeamService:
             )
         ):
             raise ValueError("Player is already in this team.")
-        if not db.get(Player, player_id):
+        player = db.get(Player, player_id)
+        if not player or player.is_deleted:
             raise ValueError("Player not found.")
 
         db.add(TeamMember(team_id=team_id, player_id=player_id))
         db.commit()
-        db.refresh(team)
-        return TeamService._response(db, team)
+        return TeamService.get(db, team_id)
 
     @staticmethod
     def remove_member(db: Session, owner_id: int, team_id: int, player_id: int):
@@ -204,5 +232,4 @@ class TeamService:
             team.captain_id = None
         db.delete(member)
         db.commit()
-        db.refresh(team)
-        return TeamService._response(db, team)
+        return TeamService.get(db, team_id)

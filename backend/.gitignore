@@ -1,0 +1,8 @@
+# Never commit these - the zip you shared contained a real .env and a Windows venv.
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.db
+.pytest_cache/

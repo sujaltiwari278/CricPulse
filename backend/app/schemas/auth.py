@@ -27,8 +27,10 @@ class LoginRequest(BaseModel):
         max_length=255,
     )
 
+    # No minimum here: the rule belongs to registration. A min_length on
+    # login turns a wrong password into a confusing 422 validation error.
     password: str = Field(
-        min_length=8,
+        min_length=1,
         max_length=128,
     )
 
