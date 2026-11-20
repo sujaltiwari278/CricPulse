@@ -162,7 +162,7 @@ export default function CreateTeam() {
               <div>
                 <p className="text-xs font-black uppercase tracking-[.22em] text-emerald-600">Team Identity</p>
                 <h2 className="mt-1 text-2xl font-black text-slate-950">Club details</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">Set the basic identity shown throughout CricPulse.</p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Set the basic identity shown throughout Cricket Gully.</p>
               </div>
               <div className="grid h-11 w-11 flex-shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
                 <Shield size={21} />
@@ -227,7 +227,7 @@ export default function CreateTeam() {
               <div>
                 <p className="text-xs font-black uppercase tracking-[.22em] text-emerald-600">Squad Selection</p>
                 <h2 className="mt-1 text-2xl font-black text-slate-950">Choose 5–11 players</h2>
-                <p className="mt-2 text-sm leading-6 text-slate-500">Search real CricPulse profiles and tap players to add them to your squad.</p>
+                <p className="mt-2 text-sm leading-6 text-slate-500">Search real Cricket Gully profiles and tap players to add them to your squad.</p>
               </div>
               <div className="grid h-11 w-11 flex-shrink-0 place-items-center rounded-xl bg-emerald-50 text-emerald-700">
                 <Users size={21} />
@@ -259,7 +259,7 @@ export default function CreateTeam() {
                     <Users size={25} />
                   </div>
                   <h3 className="mt-4 text-base font-black text-slate-800">Search for real players</h3>
-                  <p className="mt-1 text-sm text-slate-500">Players must have a CricPulse profile before they can join the team.</p>
+                  <p className="mt-1 text-sm text-slate-500">Players must have a Cricket Gully profile before they can join the team.</p>
                 </div>
               </div>
             ) : (

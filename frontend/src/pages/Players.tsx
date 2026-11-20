@@ -101,7 +101,7 @@ export default function Players() {
             </h1>
 
             <p>
-              Every profile is backed by a real CricPulse account.
+              Every profile is backed by a real Cricket Gully account.
               Find teammates, build squads and follow player careers
               across every match.
             </p>
@@ -163,7 +163,7 @@ export default function Players() {
           <div className="profile-nudge">
             <div>
               <strong>
-                Your CricPulse player card is waiting.
+                Your Cricket Gully player card is waiting.
               </strong>
 
               <span>
@@ -194,7 +194,7 @@ export default function Players() {
             </h2>
 
             <p>
-              Browse every CricPulse player profile or search
+              Browse every Cricket Gully player profile or search
               by username and display name.
             </p>
           </div>
@@ -241,7 +241,7 @@ export default function Players() {
             </h3>
 
             <p>
-              Fetching the CricPulse player network.
+              Fetching the Cricket Gully player network.
             </p>
           </div>
         )}
@@ -272,7 +272,7 @@ export default function Players() {
 
                 <p>
                   Create a player profile to appear in the
-                  CricPulse directory.
+                  Cricket Gully directory.
                 </p>
 
                 <Link
@@ -295,7 +295,7 @@ export default function Players() {
             <div className="player-directory-heading">
               <div>
                 <span className="directory-kicker">
-                  CRICPULSE PLAYERS
+                  CRICKET GULLY PLAYERS
                 </span>
 
                 <h2>

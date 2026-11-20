@@ -99,7 +99,7 @@ export default function TeamDetails() {
 
                 <div>
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-emerald-400">
-                    CricPulse team
+                    Cricket Gully team
                   </p>
                   <h1 className="mt-1 text-3xl font-black md:text-5xl">
                     {team.name}
@@ -168,7 +168,7 @@ export default function TeamDetails() {
                     </strong>
                     <p className="mt-2 text-sm font-medium leading-6 text-slate-500">
                       This cannot be undone. The team will be removed from
-                      CricPulse.
+                      Cricket Gully.
                     </p>
 
                     <div className="mt-4 flex items-center justify-end gap-2">

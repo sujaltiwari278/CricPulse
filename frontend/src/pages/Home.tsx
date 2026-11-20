@@ -99,13 +99,13 @@ export default function Home() {
               {isAuthenticated ? (
                 <Link to="/matches/create" className="home-primary-button"><Plus size={18} /> Create a match</Link>
               ) : (
-                <Link to="/auth" className="home-primary-button">Join CricPulse <ArrowRight size={18} /></Link>
+                <Link to="/auth" className="home-primary-button">Join Cricket Gully <ArrowRight size={18} /></Link>
               )}
               <Link to="/matches" className="home-secondary-button">Explore cricket <ArrowRight size={17} /></Link>
             </div>
           </div>
           <div className="home-scoreboard-art" aria-hidden="true">
-            <div className="home-scoreboard-top"><span><span className="home-live-dot" /> LIVE SCORING</span><span>CRICPULSE</span></div>
+            <div className="home-scoreboard-top"><span><span className="home-live-dot" /> LIVE SCORING</span><span>CRICKET GULLY</span></div>
             <div className="home-scoreboard-team"><span>LIVE</span><strong>REAL<span> DATA</span></strong></div>
             <div className="home-scoreboard-meta"><span>Ball by ball</span><span>Instant updates</span></div>
             <div className="home-scoreboard-over"><b>CRICKET ENGINE</b><span>BAT</span><span>BOWL</span><span>RUN</span><span>WKT</span></div>
@@ -127,7 +127,7 @@ export default function Home() {
           <div>
             <span className="home-section-kicker">MATCH HUB</span>
             <h2>Live cricket, right now</h2>
-            <p>Follow matches being scored on CricPulse in real time.</p>
+            <p>Follow matches being scored on Cricket Gully in real time.</p>
           </div>
         </div>
 

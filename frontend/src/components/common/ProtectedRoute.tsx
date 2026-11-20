@@ -7,7 +7,7 @@ export default function ProtectedRoute() {
   if (loading) {
     return (
       <div className="loading-screen">
-        Loading CricPulse...
+        Loading Cricket Gully...
       </div>
     );
   }

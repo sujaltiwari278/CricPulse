@@ -50,7 +50,7 @@ export default function TournamentDetails() {
   return <main className="tournament-detail-page"><div className="tournament-detail-container">
     <Link to="/tournaments" className="tournament-back"><ArrowLeft size={16} /> All tournaments</Link>
     <section className="tournament-detail-hero">
-      <div><span className={`match-status-pill tournament-status-${tournament.status.toLowerCase()}`}>{tournament.status}</span><p className="directory-kicker"><Trophy size={14} /> CRICPULSE TOURNAMENT</p><h1>{tournament.name}</h1><p className="tournament-detail-description">{tournament.description || "Tournament details and participating teams."}</p></div>
+      <div><span className={`match-status-pill tournament-status-${tournament.status.toLowerCase()}`}>{tournament.status}</span><p className="directory-kicker"><Trophy size={14} /> CRICKET GULLY TOURNAMENT</p><h1>{tournament.name}</h1><p className="tournament-detail-description">{tournament.description || "Tournament details and participating teams."}</p></div>
       <div className="tournament-format-badge"><strong>{tournament.format}</strong><span>{tournament.overs ? `${tournament.overs} OVERS` : "MULTI-DAY"}</span></div>
     </section>
     <section className="tournament-info-grid">
@@ -59,7 +59,7 @@ export default function TournamentDetails() {
       <Info icon={<Users size={19} />} label="Participating teams" value={`${tournament.teams.length} registered`} />
     </section>
     <section className="tournament-squads-card"><div className="tournament-section-heading"><div><span className="directory-kicker">PARTICIPANTS</span><h2>Teams in this tournament</h2></div><span>{tournament.teams.length} teams</span></div><div className="tournament-detail-teams">
-      {tournament.teams.map((team) => <Link key={team.id} to={`/teams/${team.id}`} className="tournament-detail-team"><span className="tournament-detail-logo">{team.logo_url ? <img src={team.logo_url} alt="" /> : <Shield size={23} />}</span><div><strong>{team.name}</strong><small>{team.city || "CricPulse team"} · {team.short_name}</small></div><span aria-hidden="true">→</span></Link>)}
+      {tournament.teams.map((team) => <Link key={team.id} to={`/teams/${team.id}`} className="tournament-detail-team"><span className="tournament-detail-logo">{team.logo_url ? <img src={team.logo_url} alt="" /> : <Shield size={23} />}</span><div><strong>{team.name}</strong><small>{team.city || "Cricket Gully team"} · {team.short_name}</small></div><span aria-hidden="true">→</span></Link>)}
     </div></section>
     {isOwner && <section className="tournament-danger-zone"><div><span className="directory-kicker">TOURNAMENT SETTINGS</span><h2>Delete tournament</h2><p>Remove this tournament and its team registrations permanently.</p></div><div>{confirmingDelete ? <div className="tournament-delete-confirm"><span>Delete {tournament.name}?</span><button type="button" onClick={() => setConfirmingDelete(false)} disabled={deleting}>Cancel</button><button type="button" onClick={deleteTournament} disabled={deleting}>{deleting ? "Deleting…" : "Yes, delete"}</button></div> : <button className="tournament-delete-button" type="button" onClick={() => setConfirmingDelete(true)}><Trash2 size={16} /> Delete tournament</button>}</div></section>}
     {error && <div className="tournament-error"><X size={16} /> {error}</div>}

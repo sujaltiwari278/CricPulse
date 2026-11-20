@@ -84,9 +84,9 @@ export default function Auth() {
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
         if (error.code === "ECONNABORTED") {
-          setError("The CricPulse server is still waking up. Please try again in a moment.");
+          setError("The Cricket Gully server is still waking up. Please try again in a moment.");
         } else if (!error.response) {
-          setError("We could not reach CricPulse. Check your connection and try again.");
+          setError("We could not reach Cricket Gully. Check your connection and try again.");
         } else {
           setError(error.response.data?.detail || "We could not sign you in. Please try again.");
         }
@@ -105,7 +105,7 @@ export default function Auth() {
       <div className="auth-card">
         <div className="auth-header">
           <span className="eyebrow">
-            CRICPULSE ACCOUNT
+            CRICKET GULLY ACCOUNT
           </span>
 
           <h1>
@@ -117,7 +117,7 @@ export default function Auth() {
           <p>
             {mode === "login"
               ? "Sign in to your cricket world."
-              : "Create your identity and join the CricPulse cricket community."}
+              : "Create your identity and join the Cricket Gully cricket community."}
           </p>
         </div>
 
@@ -250,7 +250,7 @@ export default function Auth() {
             disabled={submitting}
           >
             {submitting
-              ? "Connecting to CricPulse..."
+              ? "Connecting to Cricket Gully..."
               : mode === "login"
               ? "Sign in"
               : "Create account"}
