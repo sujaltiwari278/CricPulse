@@ -70,7 +70,7 @@ class Settings(BaseSettings):
         if (
             url.drivername.startswith("postgresql")
             and url.host
-            and url.host.endswith(".render.com")
+            and url.host.endswith((".render.com", ".neon.tech"))
             and "sslmode" not in url.query
         ):
             url = url.update_query_dict({"sslmode": "require"})
